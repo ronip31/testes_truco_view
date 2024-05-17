@@ -1,268 +1,126 @@
+import 'package:tuple/tuple.dart';
 import 'package:flutter/material.dart';
+import 'models/carta.dart';
+import 'models/jogador.dart';
+import 'widgets/mao_jogador_widget.dart';
+import 'jogo.dart';
+import '../models/baralho.dart';
+
+
 
 void main() {
-  runApp(TrucoGame());
+  runApp(MyApp());
+  
 }
 
-class TrucoGame extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Truco Game',
+      title: 'Jogo de Truco',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.blue,
       ),
-      home: TrucoGameScreen(),
+      home: JogoTrucoScreen(),
     );
   }
 }
 
-class TrucoGameScreen extends StatefulWidget {
+class JogoTrucoScreen extends StatefulWidget {
   @override
-  _TrucoGameScreenState createState() => _TrucoGameScreenState();
+  _JogoTrucoScreenState createState() => _JogoTrucoScreenState();
 }
 
-class _TrucoGameScreenState extends State<TrucoGameScreen> {
-  int nosScore = 0;
-  int elesScore = 0;
-  List<String> playerCards = ['K', '4', 'Q'];
-  List<String> opponentCards = ['?', '?', '?'];
+class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
+  List<Jogador> jogadores = [];
+  int jogadorAtualIndex = 0;
+  List<Carta> mesa = [];
+  Jogo jogo = Jogo();
+  List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa = [];
+  Set<Carta> cartasJaJogadas = {}; 
+  Jogador? jogadorVencedor;
 
-  void _increaseNosScore() {
+  @override
+  void initState() {
+    super.initState();
+    iniciarJogo();
+  }
+
+  void iniciarJogo() {
+    jogadores = Jogador.criarJogadores(['Jogador 1', 'Jogador 2'], 2);
+    jogo.finalizarRodada(jogadores, Baralho(), 2);
+    jogadores[0].obterCartaDaMao();
+    jogadores[1].obterCartaDaMao();
+  }
+
+  void jogarCarta(index, cartasJogadasNaMesa) {
     setState(() {
-      nosScore++;
+      jogadores[jogadorAtualIndex].mao.remove(index);
+      jogadorAtualIndex = (jogadorAtualIndex + 1) % jogadores.length;
+
+
+      // Checa se todos os jogadores jogaram suas cartas
+      if (jogadorAtualIndex == 0) {
+        // Todos os jogadores jogaram, então compara as cartas
+        jogadorVencedor = Jogo.compararCartas(cartasJogadasNaMesa);
+        print('jogadorVencedor111: ${jogadorVencedor}');
+        if (jogadorVencedor != null) {
+
+          print('\n\rGrupo ${jogadorVencedor} ganhou a rodada!');
+          // Limpa a lista de cartas jogadas na mesa após determinar o vencedor da rodada
+          cartasJogadasNaMesa.clear();
+        } else {
+          print('\n\rEmpate! Ninguém ganhou a rodada .');
+        }
+      }
     });
   }
 
-  void _increaseElesScore() {
-    setState(() {
-      elesScore++;
-    });
-  }
-
-  void _handleTruco() {
-    // Lógica do jogo para "Truco"
-    print('Truco button pressed');
-    // Adicione a lógica do jogo aqui
-  }
-
-  void _handleCorrer() {
-    // Lógica do jogo para "Correr"
-    print('Correr button pressed');
-    // Adicione a lógica do jogo aqui
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Background
-          Positioned.fill(
-            child: Container(
-              color: Colors.brown[700],
-            ),
-          ),
-          // Table
-          Center(
-            child: Container(
-              width: 300,
-              height: 400,
-              color: Colors.green[800],
-            ),
-          ),
-          // Score Information
-          Positioned(
-            top: 55,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ScoreInfo(groupName: 'Nós', score: nosScore),
-                ScoreInfo(groupName: 'Eles', score: elesScore),
-              ],
-            ),
-          ),
-          // Player Cards
-          Positioned(
-            bottom: 75,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: playerCards
-                  .map((card) => PlayerCard(rank: card, suit: 'hearts'))
-                  .toList(),
-            ),
-          ),
-          // Truco and Correr buttons
-          Positioned(
-            bottom: 10,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TrucoButton(onPressed: _handleTruco),
-                SizedBox(width: 20),
-                CorrerButton(onPressed: _handleCorrer),
-              ],
-            ),
-          ),
-          // Top Opponent Cards
-          Positioned(
-            top: 175,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: opponentCards.map((_) => SmallOpponentCard()).toList(),
-            ),
-          ),
-          // Left Opponent Cards
-          Positioned(
-            top: 100,
-            left: 5,
-            bottom: 100,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: opponentCards.map((_) => SmallOpponentCard()).toList(),
-              ),
-            ),
-          ),
-          // Right Opponent Cards
-          Positioned(
-            top: 100,
-            right: 5,
-            bottom: 100,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: opponentCards.map((_) => SmallOpponentCard()).toList(),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ScoreInfo extends StatelessWidget {
-  final String groupName;
-  final int score;
-
-  ScoreInfo({required this.groupName, required this.score});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
+  // No método build da classe _JogoTrucoScreenState, passe o índice da carta selecionada para a função selecionarCarta
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text('Jogo de Truco'),
+    ),
+    body: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          groupName,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          'Jogador Atual: ${jogadores[jogadorAtualIndex].nome}',
+          style: TextStyle(fontSize: 24.0),
         ),
-        Text(
-          score.toString(),
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        SizedBox(height: 20.0),
+        MaoJogadorWidget(
+          mao: jogadores[jogadorAtualIndex].mao,
+          
+          onCartaSelecionada: (index) {
+            print(jogadores[jogadorAtualIndex].mao);
+            setState(() {
+              var infocarta = jogadores[jogadorAtualIndex].selecionarCarta(jogadores[jogadorAtualIndex], index );
+              print('infocarta: ${infocarta}');
+              var cartaSelecionada = infocarta?.item1;
+              var valorCarta = infocarta?.item3;
+              print('MAIN: cartaSelecionada: ${cartaSelecionada} e valorCarta: ${valorCarta}');
+
+              
+              
+              var jogadorAtual = jogadores[jogadorAtualIndex];
+              cartasJogadasNaMesa.add(Tuple2<Jogador, Map<String, dynamic>>(jogadorAtual, {
+                'carta': cartaSelecionada,
+                'valor': valorCarta,
+                'jogadorQueAceitouTruco': null,
+                'pontosTruco': 0,
+              }));
+              
+              // Chama a função jogarCarta com a carta selecionada
+              jogarCarta(index, cartasJogadasNaMesa);
+            });
+          },
         ),
       ],
-    );
-  }
+    ),
+  );
 }
 
-class PlayerCard extends StatelessWidget {
-  final String rank;
-  final String suit;
-
-  PlayerCard({required this.rank, required this.suit});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(8.0),
-      width: 95,
-      height: 150,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8.0),
-        boxShadow: [
-          BoxShadow(color: Colors.black26, offset: Offset(2, 2), blurRadius: 4)
-        ],
-      ),
-      child: Center(
-        child: Text(
-          '$rank\n$suit',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, color: Colors.black),
-        ),
-      ),
-    );
-  }
-}
-
-class TrucoButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  TrucoButton({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: Text('TRUCO'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        textStyle: TextStyle(fontSize: 20),
-      ),
-    );
-  }
-}
-
-class CorrerButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  CorrerButton({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: Text('CORRER'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey,
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        textStyle: TextStyle(fontSize: 20),
-      ),
-    );
-  }
-}
-
-class SmallOpponentCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 2.0, horizontal: 5.0),
-      width: 40,
-      height: 60,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8.0),
-        boxShadow: [
-          BoxShadow(color: Colors.black26, offset: Offset(2, 2), blurRadius: 4)
-        ],
-      ),
-    );
-  }
 }
