@@ -115,16 +115,12 @@ Tuple4<Jogador, Jogador?, int, int>? selecionarCarta(Jogador jogador, int indice
     return null;
   }
 
-  jogador.indicesSelecionados.add(indice - 1);
-  var cartaSelecionada = jogador.mao[indice - 1];
+  //jogador.indicesSelecionados.add(indice - 1);
+  var cartaSelecionada = jogador.mao[indice];
   var valorCarta = cartaSelecionada.ehManilha ? cartaSelecionada.valorManilha : cartaSelecionada.valorToInt();
   
-  this.cartasJaJogadas.add(cartaSelecionada);
-  
   print('selecionarCarta: ${valorCarta} cartaSelecionada: ${cartaSelecionada}');
-  // Retorna as informações em um mapa
-
-  return Tuple4<Jogador, Jogador?, int, int>(jogador, null, valorCarta, pontosTruco);
+  return Tuple4<Jogador, Jogador?, int, int>(jogador, null, valorCarta, 0);
 }
 
 

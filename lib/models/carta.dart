@@ -3,6 +3,7 @@ class Carta {
   final String naipe;
   bool ehManilha;
   int valorManilha;
+  
 
   //Cria o objeto Carta
   Carta(this.valor, this.naipe, {this.ehManilha = false}) : valorManilha = 0;

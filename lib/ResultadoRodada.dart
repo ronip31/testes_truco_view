@@ -20,7 +20,7 @@ Jogador? vencedor(ResultadoRodada resultado) {
 }
 
 Jogador? determinarVencedor(List<ResultadoRodada> resultadosRodadas) {
-  //print("método determinarVencedor");
+  print("método determinarVencedor");
   // Verifica se há pelo menos três rodadas
   if (resultadosRodadas.length >= 3) {
     // Verifica se as duas primeiras rodadas terminaram em empate

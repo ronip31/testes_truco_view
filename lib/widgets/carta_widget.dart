@@ -4,36 +4,45 @@ import '../models/carta.dart';
 class CartaWidget extends StatelessWidget {
   final Carta carta;
   final VoidCallback onTap;
+  final bool disabled;
 
-  CartaWidget({required this.carta, required this.onTap});
+  CartaWidget({
+    required this.carta,
+    required this.onTap,
+    this.disabled = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        print('Carta ${carta.valor} ${carta.naipe} clicada');
-        onTap(); // Chama a função onTap passada como parâmetro
-      },
-      child: Container(
-        margin: EdgeInsets.all(4.0),
-        padding: EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.black),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              carta.valor,
-              style: TextStyle(fontSize: 24.0),
+      onTap: disabled ? null : onTap,
+      child: Opacity(
+        opacity: disabled ? 0.5 : 1.0, // Cartas jogadas
+        child: Container(
+          width: 85.0,  // Ajuste a largura da carta
+          height: 135.0,
+          margin: const EdgeInsets.all(10.0), 
+          decoration: BoxDecoration(
+            // color: Colors.blueGrey,
+            borderRadius: BorderRadius.circular(8.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.blueGrey,
+              spreadRadius: 3,
+              blurRadius: 25,
+              ),
+            ],
+           ),
+           // Ajuste a altura da carta
+          child: Card(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(carta.valor, style: TextStyle(fontSize: 20.0)), // Ajuste o tamanho do texto se necessário
+                Text(carta.naipe, style: TextStyle(fontSize: 16.0)), // Ajuste o tamanho do texto se necessário
+              ],
             ),
-            SizedBox(height: 4.0),
-            Text(
-              carta.naipe,
-              style: TextStyle(fontSize: 18.0),
-            ),
-          ],
+          ),
         ),
       ),
     );
