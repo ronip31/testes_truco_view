@@ -7,6 +7,7 @@ import 'jogo.dart';
 import 'models/baralho.dart';
 import 'ResultadoRodada.dart';
 import 'game.dart';
+import 'widgets/JogoTrucoScreen.dart';
 
 
 void main() {
@@ -19,12 +20,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Jogo de Truco',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.grey,
       ),
       home: JogoTrucoScreen(),
     );
   }
 }
+
+
 
 class JogoTrucoScreen extends StatefulWidget {
   @override
@@ -41,6 +44,7 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
   int numeroRodada = 1;
   String resultadoRodada = '';
   bool jogoContinua = true;
+  Carta? manilha;
 
   @override
   void initState() {
@@ -55,7 +59,9 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
 
   void reiniciarRodada() {
     setState(() {
-      iniciarProximaRodada(jogadores, Baralho(), 2, resultadosRodadas);
+      // Chama finalizarRodada para definir a manilha
+      finalizarRodada(jogadores, Baralho(), 2, resultadosRodadas);
+      manilha = manilhaGlobal;
       jogadores.forEach((jogador) => jogador.obterCartaDaMao());
       cartasJogadasNaMesa.clear();
       cartasJaJogadas.clear();
@@ -160,35 +166,18 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Jogo de Truco'),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Jogador Atual: ${jogadores[jogadorAtualIndex].nome}',
-            style: TextStyle(fontSize: 24.0),
-          ),
-          SizedBox(height: 20.0),
-          MaoJogadorWidget(
-            mao: jogadores[jogadorAtualIndex].mao,
-            onCartaSelecionada: (index) {
-              if (index >= 0 && index < jogadores[jogadorAtualIndex].mao.length) {
-                jogarCarta(jogadores[jogadorAtualIndex].mao[index]);
-              }
-            },
-            cartasJaJogadas: cartasJaJogadas,
-          ),
-          SizedBox(height: 20.0),
-          Text(
-            resultadoRodada,
-            style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.red),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+    return JogoTrucoLayout(
+      jogadores: jogadores,
+      jogadorAtualIndex: jogadorAtualIndex,
+      resultadoRodada: resultadoRodada,
+      cartasJaJogadas: cartasJaJogadas,
+      manilha: manilha,
+      onCartaSelecionada: (index) {
+        if (index >= 0 && index < jogadores[jogadorAtualIndex].mao.length) {
+          var cartaSelecionada = jogadores[jogadorAtualIndex].mao[index];
+          jogarCarta(cartaSelecionada);
+        }
+      },
     );
   }
 }

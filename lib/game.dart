@@ -42,55 +42,10 @@ Jogador? compararCartas(List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogada
   }
 
 
-  
-  void finalizarRodada(List<Jogador> jogadores, Baralho baralho, int numeroJogadores) {
-      // Limpa as mãos dos jogadores
-    for (var jogador in jogadores) {
-        jogador.mao = []; // Atribui uma lista vazia para limpar a mão do jogador
-    }
+  Carta? manilhaGlobal;
+  void finalizarRodada(List<Jogador> jogadores, Baralho baralho, int numeroJogadores, resultadosRodadas) {
 
-    baralho.embaralhar();
-
-    // Distribui as cartas para os jogadores
-    List<List<Carta>> todasMaosJogadores = baralho.distribuirCartasParaJogadores(numeroJogadores, baralho);
-
-    // Atualiza as mãos dos jogadores
-    for (int i = 0; i < jogadores.length; i++) {
-        jogadores[i].mao = todasMaosJogadores[i];
-        //print(jogadores[i].grupo);
-    }
-    
-    // Define a última carta virada como manilha
-    baralho.cartas[0].ehManilha = true;
-
-    // Define qual carta será virada na mesa
-    Carta manilha = baralho.cartas.firstWhere((carta) => carta.ehManilha);
-
-    print('\nA manilha VIRADA é: $manilha');
-
-    // Define as manilhas reais, que poderão estar nas mãos dos jogadores
-    List<Carta> manilhasReais = baralho.definirManilhaReal(manilha);
-
-    print('\nManilhas REAIS são: $manilhasReais \n');
-
-    // Atribui pontos de manilha para todas as cartas do baralho
-    for (var carta in baralho.cartas) {
-      carta.atribuirPontosManilha(manilhasReais);
-    }
-
-    // Atribui pontos de manilha para todas as mãos de jogadores
-    for (var maosJogador in todasMaosJogadores) {
-      for (var carta in maosJogador) {
-        carta.atribuirPontosManilha(manilhasReais);
-      }
-    }
-  }
-
-
-
-  void iniciarProximaRodada(List<Jogador> jogadores, Baralho baralho, int numeroJogadores, List<ResultadoRodada> resultadosRodadas) {
-    // Limpa a lista de índices das cartas selecionadas para cada jogador
-    for (var jogador in jogadores) {
+  for (var jogador in jogadores) {
       jogador.limparIndicesSelecionados();
     }
 
@@ -99,10 +54,66 @@ Jogador? compararCartas(List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogada
 
     // Limpa os resultados das rodadas
     limparResultadosRodadas(resultadosRodadas);
-
-    // Chama o método para finalizar a rodada e distribuir novas cartas no início da próxima rodada
-    finalizarRodada(jogadores, baralho, numeroJogadores);
+  // Limpa as mãos dos jogadores
+  for (var jogador in jogadores) {
+    jogador.mao = []; // Atribui uma lista vazia para limpar a mão do jogador
   }
+
+  baralho.embaralhar();
+
+  // Distribui as cartas para os jogadores
+  List<List<Carta>> todasMaosJogadores = baralho.distribuirCartasParaJogadores(numeroJogadores, baralho);
+
+  // Atualiza as mãos dos jogadores
+  for (int i = 0; i < jogadores.length; i++) {
+    jogadores[i].mao = todasMaosJogadores[i];
+  }
+
+  // Define a última carta virada como manilha
+  baralho.cartas[0].ehManilha = true;
+
+  // Define qual carta será virada na mesa
+  // Define qual carta será virada na mesa
+  manilhaGlobal = baralho.cartas.firstWhere((carta) => carta.ehManilha);
+
+  print('\nA manilha VIRADA é: $manilhaGlobal');
+
+  // Define as manilhas reais, que poderão estar nas mãos dos jogadores
+  List<Carta> manilhasReais = baralho.definirManilhaReal(manilhaGlobal!);
+
+  print('\nManilhas REAIS são: $manilhasReais \n');
+
+  // Atribui pontos de manilha para todas as cartas do baralho
+  for (var carta in baralho.cartas) {
+    carta.atribuirPontosManilha(manilhasReais);
+  }
+
+  // Atribui pontos de manilha para todas as mãos de jogadores
+  for (var maosJogador in todasMaosJogadores) {
+    for (var carta in maosJogador) {
+      carta.atribuirPontosManilha(manilhasReais);
+    }
+  }
+}
+
+
+
+
+  // void iniciarProximaRodada(List<Jogador> jogadores, Baralho baralho, int numeroJogadores, List<ResultadoRodada> resultadosRodadas) {
+  //   // Limpa a lista de índices das cartas selecionadas para cada jogador
+  //   for (var jogador in jogadores) {
+  //     jogador.limparIndicesSelecionados();
+  //   }
+
+  //   // Limpa a mesa para a próxima rodada
+  //   mesa.clear();
+
+  //   // Limpa os resultados das rodadas
+  //   limparResultadosRodadas(resultadosRodadas);
+
+  //   // Chama o método para finalizar a rodada e distribuir novas cartas no início da próxima rodada
+  //   finalizarRodada(jogadores, baralho, numeroJogadores);
+  // }
 
   void limparResultadosRodadas(List<ResultadoRodada> resultadosRodadas) {
     resultadosRodadas.clear();

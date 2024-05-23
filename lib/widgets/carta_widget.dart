@@ -23,17 +23,8 @@ class CartaWidget extends StatelessWidget {
           height: 135.0,
           margin: const EdgeInsets.all(10.0), 
           decoration: BoxDecoration(
-            // color: Colors.blueGrey,
-            borderRadius: BorderRadius.circular(8.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.blueGrey,
-              spreadRadius: 3,
-              blurRadius: 25,
-              ),
-            ],
+          borderRadius: BorderRadius.circular(8.0),
            ),
-           // Ajuste a altura da carta
           child: Card(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
