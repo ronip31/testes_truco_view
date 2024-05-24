@@ -63,14 +63,14 @@ class Jogador {
       }
       //CRIAR VALIDAÇÃO PARA NÃO PERMITIR PEDIR TRUCO SE JÁ FOI PEDIDO NA RODADA, SOMENTE AUMENTAR
       // Chama o método pedirTruco e recebe o retorno
-      Tuple4<Jogador, Jogador?, int, int>? infoTruco = pedirTruco(jogador, jogadores);
+     // Tuple4<Jogador, Jogador?, int, int>? infoTruco = pedirTruco(jogador, jogadores);
       
       // Verifica se o retorno do método pedirTruco é diferente de null
-      if (infoTruco != null) {
-          print('infoTruco da função pedir truco: ${infoTruco}');
-          // Retorna apenas os elementos necessários da tupla retornada pelo pedirTruco
-          return infoTruco;
-      }
+      // if (infoTruco != null) {
+      //     print('infoTruco da função pedir truco: ${infoTruco}');
+      //     // Retorna apenas os elementos necessários da tupla retornada pelo pedirTruco
+      //     return infoTruco;
+      // }
       
       // Retorna null caso o método pedirTruco retorne null
       continue;
@@ -126,16 +126,16 @@ Tuple4<Jogador, Jogador?, int, int>? selecionarCarta(Jogador jogador, int indice
 
 
 
-Tuple4<Jogador, Jogador?, int, int>? pedirTruco(Jogador jogador, List<Jogador> jogadores) {
-  // Determina qual jogador está pedindo truco e qual está respondendo
-  Jogador jogadorQuePediuTruco = jogador;
-  Jogador jogadorQueRespondeTruco = jogadores.firstWhere((element) => element != jogadorQuePediuTruco);
+// Tuple4<Jogador, Jogador?, int, int>? pedirTruco(Jogador jogador, List<Jogador> jogadores) {
+//   // Determina qual jogador está pedindo truco e qual está respondendo
+//   Jogador jogadorQuePediuTruco = jogador;
+//   Jogador jogadorQueRespondeTruco = jogadores.firstWhere((element) => element != jogadorQuePediuTruco);
 
-  // Cria uma instância da classe Truco e chama o método pedirTruco
-  Truco truco = Truco();
-  return truco.pedirTruco(jogadorQuePediuTruco, jogadorQueRespondeTruco, jogadores);
+//   // Cria uma instância da classe Truco e chama o método pedirTruco
+//   Truco truco = Truco();
+//   return truco.pedirTruco(jogadorQuePediuTruco, jogadorQueRespondeTruco, jogadores);
   
-}
+// }
 
   
 

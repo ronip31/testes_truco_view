@@ -5,6 +5,7 @@ import '../widgets/mao_jogador_widget.dart';
 import '../widgets/CorrerButton.dart';
 import '../widgets/TrucoButton.dart';
 import '../widgets/scoreboard.dart';
+import '../pedirtruco.dart'; // Import the Truco class
 
 class JogoTrucoLayout extends StatelessWidget {
   final List<Jogador> jogadores;
@@ -15,6 +16,7 @@ class JogoTrucoLayout extends StatelessWidget {
   final Carta? manilha;
   final bool rodadacontinua;
   final List<Carta> cartas;
+  final Truco truco = Truco();
 
   JogoTrucoLayout({
     required this.jogadores,
@@ -36,7 +38,7 @@ class JogoTrucoLayout extends StatelessWidget {
           _buildBackground(),
           _buildTable(),
           _buildPlayerHands(),
-          _buildActionButtons(),
+          _buildActionButtons(context), // Pass context to _buildActionButtons
           _buildTopInfo(),
         ],
       ),
@@ -133,38 +135,37 @@ class JogoTrucoLayout extends StatelessWidget {
   }
 
   Widget _buildPlayerHands() {
-  return Positioned(
-    bottom: 70,
-    left: 0,
-    right: 0,
-    child: Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: jogadores[jogadorAtualIndex].mao.asMap().entries.map((entry) {
-          int index = entry.key;
-          Carta carta = entry.value;
-          bool cartaJaJogada = cartasJaJogadas.contains(carta);
+    return Positioned(
+      bottom: 70,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: jogadores[jogadorAtualIndex].mao.asMap().entries.map((entry) {
+            int index = entry.key;
+            Carta carta = entry.value;
+            bool cartaJaJogada = cartasJaJogadas.contains(carta);
 
-          return GestureDetector(
-            onTap: rodadacontinua && !cartaJaJogada ? () => onCartaSelecionada(index) : null,
-            child: Container(
-              margin: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: cartaJaJogada ? Colors.grey : Colors.white,
-                border: Border.all(color: Colors.black),
-                borderRadius: BorderRadius.circular(8.0),
+            return GestureDetector(
+              onTap: rodadacontinua && !cartaJaJogada ? () => onCartaSelecionada(index) : null,
+              child: Container(
+                margin: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: cartaJaJogada ? Colors.grey : Colors.white,
+                  border: Border.all(color: Colors.black),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Image.asset(carta.imagePath, width: 92, height: 135, fit: BoxFit.cover),
               ),
-              child: Image.asset(carta.imagePath, width: 92, height: 135, fit: BoxFit.cover),
-            ),
-          );
-        }).toList(),
+            );
+          }).toList(),
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(BuildContext context) {
     return Positioned(
       bottom: 25,
       left: 0,
@@ -173,13 +174,20 @@ class JogoTrucoLayout extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TrucoButton(),
+            TrucoButton(onPressed: () => _onTrucoButtonPressed(context)),
             SizedBox(width: 50),
             CorrerButton(),
           ],
         ),
       ),
     );
+  }
+
+  void _onTrucoButtonPressed(BuildContext context) async {
+    Jogador jogadorQueRespondeTruco = jogadores[(jogadorAtualIndex + 1) % jogadores.length];
+    await truco.pedirTruco(context, jogadores[jogadorAtualIndex], jogadorQueRespondeTruco, jogadores);
+
+    // Atualize o estado do jogo conforme necessário após a resposta ao truco
   }
 
   Widget _buildTopInfo() {
