@@ -9,32 +9,33 @@ class CartaWidget extends StatelessWidget {
   CartaWidget({
     required this.carta,
     required this.onTap,
-    this.disabled = false,
+    required this.disabled,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: disabled ? null : onTap,
-      child: Opacity(
-        opacity: disabled ? 0.5 : 1.0, // Cartas jogadas
-        child: Container(
-          width: 85.0,  // Ajuste a largura da carta
-          height: 135.0,
-          margin: const EdgeInsets.all(10.0), 
-          decoration: BoxDecoration(
+      child: Container(
+        width: 85.0,
+        height: 135.0,
+        margin: const EdgeInsets.all(4.0),
+        decoration: BoxDecoration(
+          color: disabled ? Colors.grey : Colors.white,
+          border: Border.all(color: Colors.black),
           borderRadius: BorderRadius.circular(8.0),
-           ),
-          child: Card(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(carta.valor, style: TextStyle(fontSize: 20.0)), // Ajuste o tamanho do texto se necessário
-                Text(carta.naipe, style: TextStyle(fontSize: 16.0)), // Ajuste o tamanho do texto se necessário
-              ],
-            ),
-          ),
         ),
+        child: carta.imagePath.isNotEmpty
+            ? Image.asset(carta.imagePath, fit: BoxFit.cover)
+            : Card(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(carta.valor, style: TextStyle(fontSize: 20.0)),
+                    Text(carta.naipe, style: TextStyle(fontSize: 16.0)),
+                  ],
+                ),
+              ),
       ),
     );
   }

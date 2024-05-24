@@ -54,7 +54,7 @@ class Jogo {
     baralho.embaralhar();
 
     // Distribui as cartas para os jogadores
-    List<List<Carta>> todasMaosJogadores = baralho.distribuirCartasParaJogadores(numeroJogadores, baralho);
+    List<List<Carta>> todasMaosJogadores = baralho.distribuirCartasParaJogadores(numeroJogadores);
 
     // Atualiza as mãos dos jogadores
     for (int i = 0; i < jogadores.length; i++) {

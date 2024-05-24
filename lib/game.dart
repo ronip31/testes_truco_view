@@ -52,6 +52,8 @@ Jogador? compararCartas(List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogada
     // Limpa a mesa para a próxima rodada
     mesa.clear();
 
+    
+
     // Limpa os resultados das rodadas
     limparResultadosRodadas(resultadosRodadas);
   // Limpa as mãos dos jogadores
@@ -62,7 +64,7 @@ Jogador? compararCartas(List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogada
   baralho.embaralhar();
 
   // Distribui as cartas para os jogadores
-  List<List<Carta>> todasMaosJogadores = baralho.distribuirCartasParaJogadores(numeroJogadores, baralho);
+  List<List<Carta>> todasMaosJogadores = baralho.distribuirCartasParaJogadores(numeroJogadores);
 
   // Atualiza as mãos dos jogadores
   for (int i = 0; i < jogadores.length; i++) {

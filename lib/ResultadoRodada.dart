@@ -32,6 +32,10 @@ Jogador? determinarVencedor(List<ResultadoRodada> resultadosRodadas) {
     else if (vencedor(resultadosRodadas[0]) == vencedor(resultadosRodadas[2])) {
       return vencedor(resultadosRodadas[0]);
     }
+    else if (vencedor(resultadosRodadas[0]) != vencedor(resultadosRodadas[1])
+          && empatouRodada(resultadosRodadas[2])) {
+      return vencedor(resultadosRodadas[0]);
+    }
   }
 
   // Verifica se há pelo menos duas rodadas

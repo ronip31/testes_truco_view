@@ -3,159 +3,218 @@ import 'package:tuple/tuple.dart';
 import '../models/carta.dart';
 import '../models/jogador.dart';
 import '../widgets/mao_jogador_widget.dart';
+import '../jogo.dart';
+import '../models/baralho.dart';
+import '../ResultadoRodada.dart';
+import '../game.dart';
+import '../widgets/JogoTrucoLayout.dart';
 
-class JogoTrucoLayout extends StatelessWidget {
-  final List<Jogador> jogadores;
-  final int jogadorAtualIndex;
-  final String resultadoRodada;
-  final List<Carta> cartasJaJogadas;
-  final Function(int) onCartaSelecionada;
-  final Carta? manilha;
+class JogoTrucoScreen extends StatefulWidget {
+  final List<Carta> cartas;
 
-  JogoTrucoLayout({
-    required this.jogadores,
-    required this.jogadorAtualIndex,
-    required this.resultadoRodada,
-    required this.cartasJaJogadas,
-    required this.onCartaSelecionada,
-    this.manilha,
-  });
+  JogoTrucoScreen({required this.cartas});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Jogo de Truco'),
-      ),
-      body: Stack(
-        children: [
-          // Background
-          Positioned.fill(
-            child: Container(
-              color: Colors.brown[700],
+  _JogoTrucoScreenState createState() => _JogoTrucoScreenState();
+}
+
+class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
+  List<Jogador> jogadores = [];
+  int jogadorAtualIndex = 0;
+  List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa = [];
+  List<Carta> cartasJaJogadas = [];
+  List<ResultadoRodada> resultadosRodadas = [];
+  Jogador? jogadorVencedor;
+  int numeroRodada = 1;
+  String resultadoRodada = '';
+  bool jogoContinua = true;
+  bool rodadacontinua = true; // False bloqueia as cartas restantes da mão dos jogadores
+  Carta? manilha;
+  OverlayEntry? _overlayEntry;
+
+  @override
+  void initState() {
+    super.initState();
+    iniciarJogo();
+  }
+
+  void iniciarJogo() {
+    jogadores = Jogador.criarJogadores(['Jogador 1', 'Jogador 2'], 2);
+    reiniciarRodada();
+  }
+
+  void reiniciarRodada() {
+    setState(() {
+      rodadacontinua = true;
+      jogadorVencedor = null;
+      cartasJaJogadas.clear();
+      finalizarRodada(jogadores, Baralho(), 2, resultadosRodadas); // Passa as cartas carregadas para o Baralho
+      manilha = manilhaGlobal;
+      jogadores.forEach((jogador) => jogador.obterCartaDaMao());
+      cartasJogadasNaMesa.clear();
+      resultadoRodada = '';
+      jogadorAtualIndex = 0;
+    });
+  }
+
+  void jogarCarta(Carta carta) {
+    if (!rodadacontinua) return;
+    setState(() {
+      adicionarCartaNaMesa(carta);
+      removerCartaDaMao(carta);
+      atualizarJogadorAtual();
+
+      if (todosJogadoresJogaramUmaCarta()) {
+        processarFimDaRodada();
+      }
+    });
+  }
+
+  void adicionarCartaNaMesa(Carta carta) {
+    cartasJaJogadas.add(carta);
+    print('cartasJaJogadas : ${cartasJaJogadas}');
+    cartasJogadasNaMesa.add(Tuple2(
+      jogadores[jogadorAtualIndex],
+      {
+        'carta': carta,
+        'valor': carta.ehManilha ? carta.valorManilha : carta.valorToInt(),
+      },
+    ));
+  }
+
+  void removerCartaDaMao(Carta carta) {
+    jogadores[jogadorAtualIndex].mao.remove(carta);
+  }
+
+  void atualizarJogadorAtual() {
+    jogadorAtualIndex = (jogadorAtualIndex + 1) % jogadores.length;
+  }
+
+  bool todosJogadoresJogaramUmaCarta() {
+    return cartasJogadasNaMesa.length == jogadores.length;
+  }
+
+  void processarFimDaRodada() {
+    jogadorVencedor = compararCartas(cartasJogadasNaMesa);
+    mostrarResultadoRodada(jogadorVencedor);
+    resultadosRodadas.add(ResultadoRodada(numeroRodada, jogadorVencedor));
+    verificarVencedorDoJogo(resultadosRodadas);
+  }
+
+  void mostrarResultadoRodada(Jogador? jogadorVencedor) {
+    setState(() {
+      rodadacontinua = false;
+      resultadoRodada = jogadorVencedor != null
+          ? 'O ${jogadorVencedor!.nome} ganhou a rodada!'
+          : 'Empate!';
+          // Exibe o pop-up com o resultado
+      _showPopup(resultadoRodada);
+      // Limpa as cartas jogadas na mesa após mostrar o resultado
+      Future.delayed(Duration(seconds: 2), () {
+        setState(() {
+          cartasJogadasNaMesa.clear();
+          cartasJaJogadas.clear();
+          rodadacontinua = true;
+        });
+      });
+    });
+  }
+
+  void verificarVencedorDoJogo(List<ResultadoRodada> resultadosRodadas) {
+    Jogador? vencedorJogo = determinarVencedor(resultadosRodadas);
+    if (vencedorJogo != null) {
+      print('\n\rO vencedor é o jogador ${vencedorJogo.nome}');
+      rodadacontinua = false;
+      vencedorJogo.adicionarPontuacaoTotal();
+
+      for (var jogador in jogadores) {
+        int pontuacaoTotal = vencedorJogo.getPontuacaoTotal();
+        print('\n\rPontuação total do grupo ${jogador.nome} é de: $pontuacaoTotal');
+       // resultadoRodada ='\n\rPontuação total do grupo ${vencedorJogo.nome} é de: $pontuacaoTotal';
+        if (pontuacaoTotal >= 5) {
+          print('\nO Grupo ${jogador.nome} GANHOU!');
+          resultadoRodada = '\nO Grupo ${jogador.nome} GANHOU jogo!';
+          _showPopup(resultadoRodada);
+          jogoContinua = false;
+          break;
+        }
+      }
+
+      if (jogoContinua) {
+        Future.delayed(Duration(seconds: 5), (){
+          reiniciarRodada();
+        });
+      }
+    }
+  }
+
+  void reiniciarJogo() {
+    setState(() {
+      jogadores = Jogador.criarJogadores(['Jogador 1', 'Jogador 2'], 2);
+      resultadosRodadas.clear();
+      jogadorVencedor = null;
+      numeroRodada = 1;
+      resultadoRodada = '';
+      jogoContinua = true;
+      rodadacontinua = true;
+      reiniciarRodada();
+    });
+  }
+
+  void _showPopup(String message) {
+    _overlayEntry = _createOverlayEntry(message);
+    Overlay.of(context)?.insert(_overlayEntry!);
+    Future.delayed(Duration(seconds: 2), () {
+      _overlayEntry?.remove();
+    });
+  }
+
+OverlayEntry _createOverlayEntry(String message) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).size.height / 3,
+        left: MediaQuery.of(context).size.width / 4,
+        width: MediaQuery.of(context).size.width / 2,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.black87,
+              borderRadius: BorderRadius.circular(10),
             ),
-          ),
-          // Table
-          Center(
-            child: Container(
-              width: 300,
-              height: 400,
-              color: Colors.green[800],
-              child: Stack(
-                children: [
-                  // Manilha no canto superior direito
-                  if (manilha != null)
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: Container(
-                        width: 80.0,  // Ajuste a largura da carta
-                        height: 100.0,  // Ajuste a altura da carta
-                        margin: const EdgeInsets.all(0.5), 
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: Colors.black),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: Card(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(manilha!.valor, style: TextStyle(fontSize: 20.0)),
-                              Text(manilha!.naipe, style: TextStyle(fontSize: 16.0)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-          // Player's hand below the table
-          Positioned(
-            bottom: 15,
-            left: 0,
-            right: 0,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                MaoJogadorWidget(
-                  mao: jogadores[jogadorAtualIndex].mao,
-                  onCartaSelecionada: onCartaSelecionada,
-                  cartasJaJogadas: cartasJaJogadas,
+            child: Center(
+              child: Text(
+                message,
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
-                SizedBox(height: 20.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TrucoButton(),
-                    SizedBox(width: 20),
-                    CorrerButton(),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Messages: Jogador Atual and Resultado da Rodada
-          Positioned(
-            top: 20,
-            left: 20,
-            right: 20,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.black87.withOpacity(0.7), // Cor de fundo com opacidade
-                borderRadius: BorderRadius.circular(10.0), // Borda arredondada
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'Jogador Atual: ${jogadores[jogadorAtualIndex].nome}',
-                    style: TextStyle(fontSize: 24.0, color: Colors.white),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    resultadoRodada,
-                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.white),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                textAlign: TextAlign.center,
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
-}
-
-class TrucoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {},
-      child: Text('TRUCO'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        textStyle: TextStyle(fontSize: 20),
-      ),
-    );
-  }
-}
-
-class CorrerButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {},
-      child: Text('CORRER'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey,
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        textStyle: TextStyle(fontSize: 20),
-      ),
+    return JogoTrucoLayout(
+      jogadores: jogadores,
+      jogadorAtualIndex: jogadorAtualIndex,
+      resultadoRodada: resultadoRodada,
+      cartasJaJogadas: cartasJaJogadas,
+      manilha: manilha,
+      onCartaSelecionada: (index) {
+        if (index >= 0 && index < jogadores[jogadorAtualIndex].mao.length) {
+          var cartaSelecionada = jogadores[jogadorAtualIndex].mao[index];
+          jogarCarta(cartaSelecionada);
+        }
+      },
+      rodadacontinua : rodadacontinua,
+      cartas: widget.cartas,  // Passa as cartas carregadas para o layout
     );
   }
 }

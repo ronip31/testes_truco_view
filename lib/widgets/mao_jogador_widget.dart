@@ -1,44 +1,52 @@
 import 'package:flutter/material.dart';
 import '../models/carta.dart';
-import 'carta_widget.dart';
 
 class MaoJogadorWidget extends StatelessWidget {
   final List<Carta> mao;
   final Function(int) onCartaSelecionada;
   final List<Carta> cartasJaJogadas;
+  final bool rodadacontinua;
 
   MaoJogadorWidget({
     required this.mao,
     required this.onCartaSelecionada,
     required this.cartasJaJogadas,
+    required this.rodadacontinua,
   });
 
   @override
   Widget build(BuildContext context) {
-    print('MaoJogadorWidget');
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: mao.asMap().entries.map((entry) {
-        final index = entry.key;
-        final carta = entry.value;
-        final jaJogada = cartasJaJogadas.contains(carta); // Verifica se a carta já foi jogada
-
+        int idx = entry.key;
+        Carta carta = entry.value;
         return GestureDetector(
           onTap: () {
-            if (!jaJogada) {
-              onCartaSelecionada(index); // Passa o índice correto da carta na mão
-              print('Índice da carta selecionada: $index');
+            if (rodadacontinua && !cartasJaJogadas.contains(carta)) {
+              onCartaSelecionada(idx);
             }
           },
-          child: CartaWidget(
-            carta: carta,
-            onTap: () {
-              if (!jaJogada) {
-                onCartaSelecionada(index); // Passa o índice correto da carta na mão
-                print('Índice da carta selecionada: $carta');
-              }
-            },
-            disabled: jaJogada,
+          child: Container(
+            width: 80.0,
+            height: 120.0,
+            margin: const EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              color: cartasJaJogadas.contains(carta) ? Colors.grey : Colors.white,
+              border: Border.all(color: Colors.black),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: carta.imagePath.isNotEmpty
+              ? Image.asset(carta.imagePath, fit: BoxFit.cover)
+              : Card(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(carta.valor, style: TextStyle(fontSize: 20.0)),
+                      Text(carta.naipe, style: TextStyle(fontSize: 16.0)),
+                    ],
+                  ),
+                ),
           ),
         );
       }).toList(),

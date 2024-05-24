@@ -1,19 +1,22 @@
 class Carta {
   final String valor;
   final String naipe;
+  final String imagePath;
   bool ehManilha;
   int valorManilha;
-  
 
-  //Cria o objeto Carta
-  Carta(this.valor, this.naipe, {this.ehManilha = false}) : valorManilha = 0;
+  Carta({
+    required this.valor,
+    required this.naipe,
+    this.imagePath = '',
+    this.ehManilha = false,
+  }) : valorManilha = 0;
 
   @override
   String toString() {
     return '{$valor,$naipe}';
   }
 
-  //Atribui valor a cada carta
   int valorToInt() {
     switch (valor) {
       case '3':
@@ -41,12 +44,10 @@ class Carta {
     }
   }
 
-  // Método para atribuir pontos as manilhas
   void atribuirPontosManilha(List<Carta> manilhasReais) {
     for (var manilha in manilhasReais) {
       if (manilha.valor == valor && manilha.naipe == naipe) {
         ehManilha = true;
-        // Atribuir valores às manilhas
         switch (manilha.naipe) {
           case 'Paus':
             valorManilha = 14;
@@ -65,3 +66,5 @@ class Carta {
     }
   }
 }
+
+
