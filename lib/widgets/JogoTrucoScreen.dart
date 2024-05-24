@@ -72,16 +72,18 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
   }
 
   void adicionarCartaNaMesa(Carta carta) {
-    cartasJaJogadas.add(carta);
-    print('cartasJaJogadas : ${cartasJaJogadas}');
-    cartasJogadasNaMesa.add(Tuple2(
-      jogadores[jogadorAtualIndex],
-      {
-        'carta': carta,
-        'valor': carta.ehManilha ? carta.valorManilha : carta.valorToInt(),
-      },
-    ));
-  }
+  if (!rodadacontinua) return;
+  cartasJaJogadas.add(carta);
+  print('cartasJaJogadas : ${cartasJaJogadas}');
+  cartasJogadasNaMesa.add(Tuple2(
+    jogadores[jogadorAtualIndex],
+    {
+      'carta': carta,
+      'valor': carta.ehManilha ? carta.valorManilha : carta.valorToInt(),
+    },
+  ));
+}
+
 
   void removerCartaDaMao(Carta carta) {
     jogadores[jogadorAtualIndex].mao.remove(carta);
@@ -105,19 +107,18 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
 
   void mostrarResultadoRodada(Jogador? jogadorVencedor) {
     setState(() {
-
       resultadoRodada = jogadorVencedor != null
           ? 'O ${jogadorVencedor!.nome} ganhou a rodada!'
           : 'Empate!';
-          // Exibe o pop-up com o resultado
+      rodadacontinua = false;
       _showPopup(resultadoRodada);
-      // Limpa as cartas jogadas na mesa após mostrar o resultado
-      Future.delayed(Duration(seconds: 2), () {
-        setState(() {
-          cartasJogadasNaMesa.clear();
-          cartasJaJogadas.clear();
-          rodadacontinua = true;
-        });
+    });
+
+    // Limpa as cartas jogadas na mesa após mostrar o resultado e reinicia a rodada
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        cartasJogadasNaMesa.clear();
+        cartasJaJogadas.clear();
       });
     });
   }
@@ -126,17 +127,15 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
     Jogador? vencedorJogo = determinarVencedor(resultadosRodadas);
     if (vencedorJogo != null) {
       rodadacontinua = false;
-      print('\n\rO vencedor é o jogador ${vencedorJogo.nome}');
+      //print('\n\rO vencedor é o jogador ${vencedorJogo.nome}');
       vencedorJogo.adicionarPontuacaoTotal();
 
       for (var jogador in jogadores) {
         int pontuacaoTotal = vencedorJogo.getPontuacaoTotal();
-
-        print('\n\rPontuação total do grupo ${jogador.nome} é de: $pontuacaoTotal');
+        //print('\n\rPontuação total do grupo ${jogador.nome} é de: $pontuacaoTotal');
        // resultadoRodada ='\n\rPontuação total do grupo ${vencedorJogo.nome} é de: $pontuacaoTotal';
         if (pontuacaoTotal >= 5) {
-          print('\nO Grupo ${jogador.nome} GANHOU!');
-          jogoContinua = false;
+          //print('\nO Grupo ${jogador.nome} GANHOU!');
           resultadoRodada = '\nO Grupo ${jogador.nome} GANHOU jogo!';
           _showPopup(resultadoRodada);
           
@@ -145,7 +144,6 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
       }
 
       if (jogoContinua) {
-        jogoContinua = false;
         Future.delayed(Duration(seconds: 5), (){
           reiniciarRodada();
         });
@@ -171,6 +169,7 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
     Overlay.of(context)?.insert(_overlayEntry!);
     Future.delayed(Duration(seconds: 2), () {
       _overlayEntry?.remove();
+      rodadacontinua = true;
     });
   }
 
