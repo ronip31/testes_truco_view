@@ -52,8 +52,9 @@ class JogoTrucoLayout extends StatelessWidget {
         children: [
           // Background
           Positioned.fill(
-            child: Container(
-              color: Colors.brown[700],
+            child: Image.asset(
+              'assets/imgs/background.png', // Caminho para a imagem de fundo
+              fit: BoxFit.cover,
             ),
           ),
           // Table
@@ -65,7 +66,10 @@ class JogoTrucoLayout extends StatelessWidget {
               child: Container(
                 width: 300,
                 height: 400,
-                color: Colors.green[800],
+                color: Color.fromARGB(221, 30, 122, 2).withOpacity(0.8), 
+                
+                 // Cor de fundo com opacidade
+                //borderRadius: BorderRadius.circular(10.0),
                 child: Stack(
                   children: [
                     // Manilha no canto superior direito

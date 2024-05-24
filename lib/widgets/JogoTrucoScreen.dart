@@ -65,6 +65,7 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
       atualizarJogadorAtual();
 
       if (todosJogadoresJogaramUmaCarta()) {
+        rodadacontinua = false;
         processarFimDaRodada();
       }
     });
@@ -95,6 +96,7 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
   }
 
   void processarFimDaRodada() {
+    //rodadacontinua = false;
     jogadorVencedor = compararCartas(cartasJogadasNaMesa);
     mostrarResultadoRodada(jogadorVencedor);
     resultadosRodadas.add(ResultadoRodada(numeroRodada, jogadorVencedor));
@@ -103,7 +105,7 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
 
   void mostrarResultadoRodada(Jogador? jogadorVencedor) {
     setState(() {
-      rodadacontinua = false;
+
       resultadoRodada = jogadorVencedor != null
           ? 'O ${jogadorVencedor!.nome} ganhou a rodada!'
           : 'Empate!';
@@ -123,24 +125,27 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
   void verificarVencedorDoJogo(List<ResultadoRodada> resultadosRodadas) {
     Jogador? vencedorJogo = determinarVencedor(resultadosRodadas);
     if (vencedorJogo != null) {
-      print('\n\rO vencedor é o jogador ${vencedorJogo.nome}');
       rodadacontinua = false;
+      print('\n\rO vencedor é o jogador ${vencedorJogo.nome}');
       vencedorJogo.adicionarPontuacaoTotal();
 
       for (var jogador in jogadores) {
         int pontuacaoTotal = vencedorJogo.getPontuacaoTotal();
+
         print('\n\rPontuação total do grupo ${jogador.nome} é de: $pontuacaoTotal');
        // resultadoRodada ='\n\rPontuação total do grupo ${vencedorJogo.nome} é de: $pontuacaoTotal';
         if (pontuacaoTotal >= 5) {
           print('\nO Grupo ${jogador.nome} GANHOU!');
+          jogoContinua = false;
           resultadoRodada = '\nO Grupo ${jogador.nome} GANHOU jogo!';
           _showPopup(resultadoRodada);
-          jogoContinua = false;
+          
           break;
         }
       }
 
       if (jogoContinua) {
+        jogoContinua = false;
         Future.delayed(Duration(seconds: 5), (){
           reiniciarRodada();
         });
