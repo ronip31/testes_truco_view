@@ -21,11 +21,11 @@ class Truco {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('O jogador ${jogadorQuePediuTruco.nome} pediu truco!'),
+          title: Text('O ${jogadorQuePediuTruco.nome} pediu truco!'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Opções para o Grupo ${jogadorQueRespondeTruco.grupo} adversário:'),
+              Text('Opções para o Grupo ${jogadorQueRespondeTruco.nome} adversário:'),
               ListTile(
                 title: Text('Aceitar (3 pontos)'),
                 onTap: () => Navigator.of(context).pop('1'),
@@ -73,7 +73,7 @@ class Truco {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Opções para o Grupo ${jogadorQuePediuTruco.grupo} adversário:'),
+              Text('Opções para o Grupo ${jogadorQuePediuTruco.nome} adversário:'),
               ListTile(
                 title: Text('Aceitar (6 pontos)'),
                 onTap: () => Navigator.of(context).pop('1'),
@@ -93,7 +93,9 @@ class Truco {
     );
 
     switch (resposta6) {
+      
       case '1':
+        print('resposta6: ${resposta6}');
         trucoFoiAceito = true;
         jogadorQueAceitouTruco = jogadorQuePediuTruco;
         pontosTruco = PONTOS_6;
