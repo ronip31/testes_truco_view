@@ -1,7 +1,7 @@
 import '../models/carta.dart';
 
 class Baralho {
-  List<Carta> _cartas = [];
+  final  List<Carta> _cartas = [];
   final naipes = ['Paus', 'Copas', 'Espadas', 'Ouros'];
   final valores = ['2', '3', '4', '5', '6', '7', 'Q', 'J', 'K', 'A'];
 

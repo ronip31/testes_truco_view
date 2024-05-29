@@ -1,6 +1,4 @@
-import 'jogo.dart';
 import 'models/jogador.dart';
-import 'dart:io';
 
 class ResultadoRodada {
   final int numeroRodada;

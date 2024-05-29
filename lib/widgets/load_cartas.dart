@@ -8,7 +8,7 @@ List<Carta> loadCartas() {
   for (String suit in suits) {
     for (String value in values) {
       final imagePath = 'assets/imgs/$value.$suit.png';
-      print('Criando carta: $value de $suit com caminho $imagePath');
+      //print('Criando carta: $value de $suit com caminho $imagePath');
       cartas.add(Carta(
         valor: value,
         naipe: suit,

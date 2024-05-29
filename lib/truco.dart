@@ -1,46 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:tuple/tuple.dart';
 import 'models/jogador.dart';
-import 'truco.dart';
-import 'widgets/trucobutton.dart';
-import 'pedirTruco.dart';
+import 'pedir_truco.dart';
 
 
-class TrucoGamePage extends StatefulWidget {
+class TrucoGame extends StatefulWidget {
+  const TrucoGame({super.key});
+
   @override
-  _TrucoGamePageState createState() => _TrucoGamePageState();
+  TrucoGameState createState() => TrucoGameState();
 }
 
-class _TrucoGamePageState extends State<TrucoGamePage> {
-  List<Jogador> jogadores = [Jogador('Jogador 1', 1), Jogador('Jogador 2',2)];  // Exemplo de jogadores
-  int jogadorAtualIndex = 0;  // Índice do jogador atual
+class TrucoGameState extends State<TrucoGame> {
+  int jogadorAtualIndex = 0;
+  List<Jogador> jogadores = [Jogador("Jogador 1",1), Jogador("Jogador 2",2)];
   Truco truco = Truco();
-  
-  void _pedirTruco() async {
+
+  void _onTrucoButtonPressed(BuildContext context) async {
     Jogador jogadorQuePediuTruco = jogadores[jogadorAtualIndex];
     Jogador jogadorQueRespondeTruco = jogadores[(jogadorAtualIndex + 1) % jogadores.length];
-
-    var resultado = await truco.pedirTruco(context, jogadorQuePediuTruco, jogadorQueRespondeTruco, jogadores);
-
-    // Atualizar o estado do jogo com base no resultado
-    setState(() {
-      // Atualize o estado do jogo aqui se necessário
-    });
+    print('jogadorQuePediuTruco: $jogadorQuePediuTruco');
+    await truco.pedirTruco(context, jogadorQuePediuTruco, jogadorQueRespondeTruco, jogadores);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Jogo de Truco'),
+        title: const Text('Truco Game'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Jogador Atual: ${jogadores[jogadorAtualIndex].nome}'),
-            // Outros widgets do jogo
-            TrucoButton(onPressed: _pedirTruco),
+          children: [
+            Text('Jogador atual: ${jogadores[jogadorAtualIndex].nome}'),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => _onTrucoButtonPressed(context),
+              child: const Text('Pedir Truco'),
+            ),
           ],
         ),
       ),

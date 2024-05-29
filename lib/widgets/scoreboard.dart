@@ -4,12 +4,12 @@ class PontuacaoWidget extends StatelessWidget {
   final int nos;
   final int eles;
 
-  PontuacaoWidget({required this.nos, required this.eles});
+  const PontuacaoWidget({super.key, required this.nos, required this.eles});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: _buildBoxDecoration(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -30,7 +30,7 @@ class PontuacaoWidget extends StatelessWidget {
           color: Colors.black.withOpacity(0.3),
           spreadRadius: 2,
           blurRadius: 5,
-          offset: Offset(0, 2),
+          offset: const Offset(0, 2),
         ),
       ],
     );
@@ -41,11 +41,11 @@ class PontuacaoWidget extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
         ),
         Text(
           score.toString(),
-          style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ],
     );

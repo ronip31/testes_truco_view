@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class ObterNomesJogadores extends StatefulWidget {
   final Function(List<String>) onNomesSubmit;
 
-  ObterNomesJogadores({required this.onNomesSubmit});
+  const ObterNomesJogadores({super.key, required this.onNomesSubmit});
 
   @override
-  _ObterNomesJogadoresState createState() => _ObterNomesJogadoresState();
+  ObterNomesJogadoresState createState() => ObterNomesJogadoresState();
 }
 
-class _ObterNomesJogadoresState extends State<ObterNomesJogadores> {
+class ObterNomesJogadoresState extends State<ObterNomesJogadores> {
   final _formKey = GlobalKey<FormState>();
   List<TextEditingController> _controllers = [];
 
@@ -21,9 +21,12 @@ class _ObterNomesJogadoresState extends State<ObterNomesJogadores> {
 
   @override
   void dispose() {
-    _controllers.forEach((controller) => controller.dispose());
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
+
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
@@ -35,9 +38,9 @@ class _ObterNomesJogadoresState extends State<ObterNomesJogadores> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Obter Nomes dos Jogadores')),
+      appBar: AppBar(title: const Text('Obter Nomes dos Jogadores')),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -45,7 +48,7 @@ class _ObterNomesJogadoresState extends State<ObterNomesJogadores> {
               ..._controllers.map((controller) {
                 return TextFormField(
                   controller: controller,
-                  decoration: InputDecoration(labelText: 'Nome do Jogador'),
+                  decoration: const InputDecoration(labelText: 'Nome do Jogador'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Por favor, insira um nome';
@@ -53,11 +56,11 @@ class _ObterNomesJogadoresState extends State<ObterNomesJogadores> {
                     return null;
                   },
                 );
-              }).toList(),
-              SizedBox(height: 20),
+              }),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submit,
-                child: Text('Submit'),
+                child: const Text('Submit'),
               ),
             ],
           ),

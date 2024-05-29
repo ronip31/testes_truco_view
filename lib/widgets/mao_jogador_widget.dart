@@ -7,7 +7,8 @@ class MaoJogadorWidget extends StatelessWidget {
   final List<Carta> cartasJaJogadas;
   final bool rodadacontinua;
 
-  MaoJogadorWidget({
+  const MaoJogadorWidget({
+    super.key,
     required this.mao,
     required this.onCartaSelecionada,
     required this.cartasJaJogadas,
@@ -42,8 +43,8 @@ class MaoJogadorWidget extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(carta.valor, style: TextStyle(fontSize: 20.0)),
-                      Text(carta.naipe, style: TextStyle(fontSize: 16.0)),
+                      Text(carta.valor, style: const TextStyle(fontSize: 20.0)),
+                      Text(carta.naipe, style: const TextStyle(fontSize: 16.0)),
                     ],
                   ),
                 ),

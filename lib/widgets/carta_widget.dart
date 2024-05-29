@@ -6,7 +6,7 @@ class CartaWidget extends StatelessWidget {
   final VoidCallback onTap;
   final bool disabled;
 
-  CartaWidget({
+  const CartaWidget({super.key, 
     required this.carta,
     required this.onTap,
     required this.disabled,
@@ -31,8 +31,8 @@ class CartaWidget extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(carta.valor, style: TextStyle(fontSize: 20.0)),
-                    Text(carta.naipe, style: TextStyle(fontSize: 16.0)),
+                    Text(carta.valor, style: const TextStyle(fontSize: 20.0)),
+                    Text(carta.naipe, style: const TextStyle(fontSize: 16.0)),
                   ],
                 ),
               ),

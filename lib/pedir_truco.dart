@@ -3,20 +3,20 @@ import 'package:tuple/tuple.dart';
 import 'models/jogador.dart';
 
 class Truco {
-  static const int PONTOS_INICIAL = 3;
-  static const int PONTOS_6 = 6;
-  static const int PONTOS_9 = 9;
-  static const int PONTOS_12 = 12;
+  static const int pontosInicial = 3;
+  static const int pontos_6 = 6;
+  static const int pontos_9 = 9;
+  static const int pontos_12 = 12;
   
   bool trucoFoiAceito = false;
   Jogador? jogadorQuePediuTruco;
   Jogador? jogadorQueAceitouTruco;
-  int pontosTruco = Truco.PONTOS_INICIAL;
+  int pontosTruco = Truco.pontosInicial;
   int jogadorPediuTruco = 0;
 
   Future<Tuple4<Jogador, Jogador?, int, int>> pedirTruco(BuildContext context, Jogador jogadorQuePediuTruco, Jogador jogadorQueRespondeTruco, List<Jogador> jogadores) async {
     this.jogadorQuePediuTruco = jogadorQuePediuTruco;
-
+    print('jogadorQuePediuTruco: $jogadorQuePediuTruco');
     String? resposta = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
@@ -25,17 +25,17 @@ class Truco {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Opções para o Grupo ${jogadorQueRespondeTruco.nome} adversário:'),
+              Text('Opções para o ${jogadorQueRespondeTruco.nome} adversário:'),
               ListTile(
-                title: Text('Aceitar (3 pontos)'),
+                title: const Text('Aceitar (3 pontos)'),
                 onTap: () => Navigator.of(context).pop('1'),
               ),
               ListTile(
-                title: Text('Pedir 6 (6 pontos)'),
+                title: const Text('Pedir 6 (6 pontos)'),
                 onTap: () => Navigator.of(context).pop('2'),
               ),
               ListTile(
-                title: Text('Recusar'),
+                title: const Text('Recusar'),
                 onTap: () => Navigator.of(context).pop('3'),
               ),
             ],
@@ -49,7 +49,7 @@ class Truco {
         trucoFoiAceito = true;
         jogadorQueAceitouTruco = jogadorQueRespondeTruco;
         jogadorPediuTruco = jogadores.indexOf(jogadorQuePediuTruco);
-        pontosTruco = PONTOS_INICIAL;
+        pontosTruco = pontosInicial;
         break;
       case '2':
         return await pedir6(context, jogadorQuePediuTruco, jogadorQueRespondeTruco, jogadores);
@@ -69,21 +69,21 @@ class Truco {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('O jogador ${jogadorQueRespondeTruco.nome} pediu 6!'),
+          title: Text('O ${jogadorQueRespondeTruco.nome} pediu 6!'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Opções para o Grupo ${jogadorQuePediuTruco.nome} adversário:'),
+              Text('Opções para o ${jogadorQuePediuTruco.nome} adversário:'),
               ListTile(
-                title: Text('Aceitar (6 pontos)'),
+                title: const Text('Aceitar (6 pontos)'),
                 onTap: () => Navigator.of(context).pop('1'),
               ),
               ListTile(
-                title: Text('Pedir 9 (9 pontos)'),
+                title: const Text('Pedir 9 (9 pontos)'),
                 onTap: () => Navigator.of(context).pop('2'),
               ),
               ListTile(
-                title: Text('Recusar'),
+                title: const Text('Recusar'),
                 onTap: () => Navigator.of(context).pop('3'),
               ),
             ],
@@ -93,17 +93,17 @@ class Truco {
     );
 
     switch (resposta6) {
-      
+        
       case '1':
-        print('resposta6: ${resposta6}');
+        print('resposta6: $resposta6');
         trucoFoiAceito = true;
         jogadorQueAceitouTruco = jogadorQuePediuTruco;
-        pontosTruco = PONTOS_6;
+        pontosTruco = pontos_6;
         break;
       case '2':
         return await pedir9(context, jogadorQuePediuTruco, jogadorQueRespondeTruco, jogadores);
       case '3':
-        pontosTruco = PONTOS_INICIAL;
+        pontosTruco = pontosInicial;
         jogadorQuePediuTruco.adicionarPontuacaoTotalTruco(pontosTruco);
         break;
       default:
@@ -118,21 +118,21 @@ class Truco {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('O jogador ${jogadorQuePediuTruco.nome} pediu 9!'),
+          title: Text('O ${jogadorQuePediuTruco.nome} pediu 9!'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Opções para o Grupo ${jogadorQueRespondeTruco.grupo} adversário:'),
+              Text('Opções para o ${jogadorQueRespondeTruco.nome} adversário:'),
               ListTile(
-                title: Text('Aceitar (9 pontos)'),
+                title: const Text('Aceitar (9 pontos)'),
                 onTap: () => Navigator.of(context).pop('1'),
               ),
               ListTile(
-                title: Text('Pedir 12 (12 pontos)'),
+                title: const Text('Pedir 12 (12 pontos)'),
                 onTap: () => Navigator.of(context).pop('2'),
               ),
               ListTile(
-                title: Text('Recusar'),
+                title: const Text('Recusar'),
                 onTap: () => Navigator.of(context).pop('3'),
               ),
             ],
@@ -143,14 +143,15 @@ class Truco {
 
     switch (resposta9) {
       case '1':
+        print('resposta9: $resposta9');
         trucoFoiAceito = true;
         jogadorQueAceitouTruco = jogadorQueRespondeTruco;
-        pontosTruco = PONTOS_9;
+        pontosTruco = pontos_9;
         break;
       case '2':
         return await pedir12(context, jogadorQuePediuTruco, jogadorQueRespondeTruco, jogadores);
       case '3':
-        pontosTruco = PONTOS_6;
+        pontosTruco = pontos_6;
         jogadorQuePediuTruco.adicionarPontuacaoTotalTruco(pontosTruco);
         break;
       default:
@@ -165,17 +166,17 @@ class Truco {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('O jogador ${jogadorQueRespondeTruco.nome} pediu 12!'),
+          title: Text('O ${jogadorQueRespondeTruco.nome} pediu 12!'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Opções para o Grupo ${jogadorQuePediuTruco.grupo} adversário:'),
+              Text('Opções para o ${jogadorQuePediuTruco.nome} adversário:'),
               ListTile(
-                title: Text('Aceitar (12 pontos)'),
+                title: const Text('Aceitar (12 pontos)'),
                 onTap: () => Navigator.of(context).pop('1'),
               ),
               ListTile(
-                title: Text('Recusar'),
+                title: const Text('Recusar'),
                 onTap: () => Navigator.of(context).pop('2'),
               ),
             ],
@@ -186,12 +187,13 @@ class Truco {
 
     switch (resposta12) {
       case '1':
-        pontosTruco = PONTOS_12;
+      print('resposta12: $resposta12');
+        pontosTruco = pontos_12;
         trucoFoiAceito = true;
         jogadorQueAceitouTruco = jogadorQueRespondeTruco;
         break;
       case '2':
-        pontosTruco = PONTOS_9;
+        pontosTruco = pontos_9;
         jogadorQuePediuTruco.adicionarPontuacaoTotalTruco(pontosTruco);
         break;
       default:

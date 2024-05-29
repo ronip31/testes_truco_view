@@ -2,23 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 import '../models/carta.dart';
 import '../models/jogador.dart';
-import '../widgets/mao_jogador_widget.dart';
-import '../jogo.dart';
 import '../models/baralho.dart';
-import '../ResultadoRodada.dart';
+import '../resultado_rodada.dart';
 import '../game.dart';
-import '../widgets/JogoTrucoLayout.dart';
+import 'truco_layout.dart';
+import '../pedir_truco.dart';
 
 class JogoTrucoScreen extends StatefulWidget {
   final List<Carta> cartas;
 
-  JogoTrucoScreen({required this.cartas});
+  const JogoTrucoScreen({super.key, required this.cartas});
 
   @override
-  _JogoTrucoScreenState createState() => _JogoTrucoScreenState();
+  JogoTrucoScreenState createState() => JogoTrucoScreenState();
 }
 
-class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
+class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   List<Jogador> jogadores = [];
   int jogadorAtualIndex = 0;
   List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa = [];
@@ -31,6 +30,7 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
   bool rodadacontinua = true; // False bloqueia as cartas restantes da mão dos jogadores
   Carta? manilha;
   OverlayEntry? _overlayEntry;
+  Truco truco = Truco();
 
   @override
   void initState() {
@@ -50,10 +50,13 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
       cartasJaJogadas.clear();
       finalizarRodada(jogadores, Baralho(), 2, resultadosRodadas); // Passa as cartas carregadas para o Baralho
       manilha = manilhaGlobal;
-      jogadores.forEach((jogador) => jogador.obterCartaDaMao());
+      for (var jogador in jogadores) {
+        jogador.obterCartaDaMao();
+      }
       cartasJogadasNaMesa.clear();
       resultadoRodada = '';
       jogadorAtualIndex = 0;
+      truco.jogadorQuePediuTruco = null;  // Resetar quem pediu truco ao iniciar uma nova rodada
     });
   }
 
@@ -72,18 +75,17 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
   }
 
   void adicionarCartaNaMesa(Carta carta) {
-  if (!rodadacontinua) return;
-  cartasJaJogadas.add(carta);
-  print('cartasJaJogadas : ${cartasJaJogadas}');
-  cartasJogadasNaMesa.add(Tuple2(
-    jogadores[jogadorAtualIndex],
-    {
-      'carta': carta,
-      'valor': carta.ehManilha ? carta.valorManilha : carta.valorToInt(),
-    },
-  ));
-}
-
+    if (!rodadacontinua) return;
+    cartasJaJogadas.add(carta);
+    print('cartasJaJogadas : $cartasJaJogadas');
+    cartasJogadasNaMesa.add(Tuple2(
+      jogadores[jogadorAtualIndex],
+      {
+        'carta': carta,
+        'valor': carta.ehManilha ? carta.valorManilha : carta.valorToInt(),
+      },
+    ));
+  }
 
   void removerCartaDaMao(Carta carta) {
     jogadores[jogadorAtualIndex].mao.remove(carta);
@@ -98,7 +100,6 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
   }
 
   void processarFimDaRodada() {
-    //rodadacontinua = false;
     jogadorVencedor = compararCartas(cartasJogadasNaMesa);
     mostrarResultadoRodada(jogadorVencedor);
     resultadosRodadas.add(ResultadoRodada(numeroRodada, jogadorVencedor));
@@ -108,14 +109,14 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
   void mostrarResultadoRodada(Jogador? jogadorVencedor) {
     setState(() {
       resultadoRodada = jogadorVencedor != null
-          ? 'O ${jogadorVencedor!.nome} ganhou a rodada!'
+          ? 'O ${jogadorVencedor.nome} ganhou a rodada!'
           : 'Empate!';
       rodadacontinua = false;
       _showPopup(resultadoRodada);
     });
 
     // Limpa as cartas jogadas na mesa após mostrar o resultado e reinicia a rodada
-    Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 2), () {
       setState(() {
         cartasJogadasNaMesa.clear();
         cartasJaJogadas.clear();
@@ -127,15 +128,16 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
     Jogador? vencedorJogo = determinarVencedor(resultadosRodadas);
     if (vencedorJogo != null) {
       rodadacontinua = false;
-      //print('\n\rO vencedor é o jogador ${vencedorJogo.nome}');
+
+      // resultadoRodada = '\nO Grupo ${vencedorJogo.nome} GANHOU  RODADA!';
+      //     _showPopup(resultadoRodada);
+
       vencedorJogo.adicionarPontuacaoTotal();
 
       for (var jogador in jogadores) {
         int pontuacaoTotal = vencedorJogo.getPontuacaoTotal();
-        //print('\n\rPontuação total do grupo ${jogador.nome} é de: $pontuacaoTotal');
-       // resultadoRodada ='\n\rPontuação total do grupo ${vencedorJogo.nome} é de: $pontuacaoTotal';
-        if (pontuacaoTotal >= 5) {
-          //print('\nO Grupo ${jogador.nome} GANHOU!');
+
+        if (pontuacaoTotal >= 12) {
           resultadoRodada = '\nO Grupo ${jogador.nome} GANHOU jogo!';
           _showPopup(resultadoRodada);
           
@@ -144,7 +146,7 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
       }
 
       if (jogoContinua) {
-        Future.delayed(Duration(seconds: 5), (){
+        Future.delayed(const Duration(seconds: 5), (){
           reiniciarRodada();
         });
       }
@@ -166,14 +168,14 @@ class _JogoTrucoScreenState extends State<JogoTrucoScreen> {
 
   void _showPopup(String message) {
     _overlayEntry = _createOverlayEntry(message);
-    Overlay.of(context)?.insert(_overlayEntry!);
-    Future.delayed(Duration(seconds: 2), () {
+    Overlay.of(context).insert(_overlayEntry!);
+    Future.delayed(const Duration(seconds: 2), () {
       _overlayEntry?.remove();
       rodadacontinua = true;
     });
   }
 
-OverlayEntry _createOverlayEntry(String message) {
+  OverlayEntry _createOverlayEntry(String message) {
     return OverlayEntry(
       builder: (context) => Positioned(
         top: MediaQuery.of(context).size.height / 3,
@@ -182,7 +184,7 @@ OverlayEntry _createOverlayEntry(String message) {
         child: Material(
           color: Colors.transparent,
           child: Container(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.black87,
               borderRadius: BorderRadius.circular(10),
@@ -190,7 +192,7 @@ OverlayEntry _createOverlayEntry(String message) {
             child: Center(
               child: Text(
                 message,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -203,6 +205,7 @@ OverlayEntry _createOverlayEntry(String message) {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return JogoTrucoLayout(
@@ -217,8 +220,8 @@ OverlayEntry _createOverlayEntry(String message) {
           jogarCarta(cartaSelecionada);
         }
       },
-      rodadacontinua : rodadacontinua,
-      cartas: widget.cartas,  // Passa as cartas carregadas para o layout
+      rodadacontinua: rodadacontinua,
+      cartas: widget.cartas, 
     );
   }
 }

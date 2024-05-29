@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'models/carta.dart';
-import 'widgets/JogoTrucoLayout.dart';
-import 'widgets/loadCartas.dart';
-import 'widgets/JogoTrucoScreen.dart';
-
+import 'widgets/load_cartas.dart';
+import 'widgets/truco_screen.dart';
 
 void main() {
   List<Carta> cartas = loadCartas();
@@ -13,7 +11,7 @@ void main() {
 class MyApp extends StatelessWidget {
   final List<Carta> cartas;
 
-  MyApp({required this.cartas});
+  const MyApp({super.key, required this.cartas});
 
   @override
   Widget build(BuildContext context) {

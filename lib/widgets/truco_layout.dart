@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/carta.dart';
 import '../models/jogador.dart';
-import '../widgets/mao_jogador_widget.dart';
-import '../widgets/CorrerButton.dart';
-import '../widgets/TrucoButton.dart';
+import 'esconder_button.dart';
+import 'truco_button.dart';
 import '../widgets/scoreboard.dart';
-import '../pedirtruco.dart'; // Import the Truco class
+import '../pedir_truco.dart';
 
 class JogoTrucoLayout extends StatelessWidget {
   final List<Jogador> jogadores;
@@ -19,6 +18,7 @@ class JogoTrucoLayout extends StatelessWidget {
   final Truco truco = Truco();
 
   JogoTrucoLayout({
+    super.key,
     required this.jogadores,
     required this.jogadorAtualIndex,
     required this.resultadoRodada,
@@ -38,7 +38,7 @@ class JogoTrucoLayout extends StatelessWidget {
           _buildBackground(),
           _buildTable(),
           _buildPlayerHands(),
-          _buildActionButtons(context), // Pass context to _buildActionButtons
+          _buildActionButtons(context),
           _buildTopInfo(),
         ],
       ),
@@ -53,8 +53,8 @@ class JogoTrucoLayout extends StatelessWidget {
       title: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('TRUCO', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
-          SizedBox(height: 10),
+          const Text('TRUCO ROYALE', style:  TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 212, 177, 18))),
+          const SizedBox(height: 10),
           PontuacaoWidget(nos: jogadores[0].getPontuacaoTotal(), eles: jogadores[1].getPontuacaoTotal()),
         ],
       ),
@@ -175,8 +175,8 @@ class JogoTrucoLayout extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TrucoButton(onPressed: () => _onTrucoButtonPressed(context)),
-            SizedBox(width: 50),
-            CorrerButton(),
+            const SizedBox(width: 50),
+            const CorrerButton(),
           ],
         ),
       ),
@@ -186,8 +186,6 @@ class JogoTrucoLayout extends StatelessWidget {
   void _onTrucoButtonPressed(BuildContext context) async {
     Jogador jogadorQueRespondeTruco = jogadores[(jogadorAtualIndex + 1) % jogadores.length];
     await truco.pedirTruco(context, jogadores[jogadorAtualIndex], jogadorQueRespondeTruco, jogadores);
-
-    // Atualize o estado do jogo conforme necessário após a resposta ao truco
   }
 
   Widget _buildTopInfo() {
@@ -196,7 +194,7 @@ class JogoTrucoLayout extends StatelessWidget {
       left: 40,
       right: 40,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.black87.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
@@ -205,9 +203,9 @@ class JogoTrucoLayout extends StatelessWidget {
           children: [
             Text(
               'Jogador Atual: ${jogadores[jogadorAtualIndex].nome}',
-              style: TextStyle(fontSize: 20, color: Colors.white),
+              style: const TextStyle(fontSize: 20, color: Colors.white),
             ),
-            SizedBox(height: 2),
+            const SizedBox(height: 2),
           ],
         ),
       ),
