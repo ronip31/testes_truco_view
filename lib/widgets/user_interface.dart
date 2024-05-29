@@ -5,8 +5,9 @@ import 'esconder_button.dart';
 import 'truco_button.dart';
 import '../widgets/scoreboard.dart';
 import '../pedir_truco.dart';
+import '../truco_manager.dart';
 
-class JogoTrucoLayout extends StatelessWidget {
+class JogoTrucoLayout extends StatefulWidget {
   final List<Jogador> jogadores;
   final int jogadorAtualIndex;
   final String resultadoRodada;
@@ -15,9 +16,9 @@ class JogoTrucoLayout extends StatelessWidget {
   final Carta? manilha;
   final bool rodadacontinua;
   final List<Carta> cartas;
-  final Truco truco = Truco();
+  
 
-  JogoTrucoLayout({
+  const JogoTrucoLayout({
     super.key,
     required this.jogadores,
     required this.jogadorAtualIndex,
@@ -28,6 +29,17 @@ class JogoTrucoLayout extends StatelessWidget {
     required this.rodadacontinua,
     required this.cartas,
   });
+
+  @override
+  JogoTrucoLayoutState createState() => JogoTrucoLayoutState();
+}
+
+class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
+  Truco truco = Truco();
+  final TrucoManager trucoManager = TrucoManager(); // Instancia a nova classe
+
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -53,9 +65,9 @@ class JogoTrucoLayout extends StatelessWidget {
       title: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('TRUCO ROYALE', style:  TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 212, 177, 18))),
+          const Text('TRUCO ROYALE', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 212, 177, 18))),
           const SizedBox(height: 10),
-          PontuacaoWidget(nos: jogadores[0].getPontuacaoTotal(), eles: jogadores[1].getPontuacaoTotal()),
+          PontuacaoWidget(nos: widget.jogadores[0].getPontuacaoTotal(), eles: widget.jogadores[1].getPontuacaoTotal()),
         ],
       ),
       centerTitle: true,
@@ -86,7 +98,7 @@ class JogoTrucoLayout extends StatelessWidget {
           ),
           child: Stack(
             children: [
-              if (manilha != null) _buildManilha(),
+              if (widget.manilha != null) _buildManilha(),
               _buildPlayedCards(),
             ],
           ),
@@ -109,7 +121,7 @@ class JogoTrucoLayout extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.all(4.0),
-          child: Image.asset(manilha!.imagePath),
+          child: Image.asset(widget.manilha!.imagePath),
         ),
       ),
     );
@@ -123,7 +135,7 @@ class JogoTrucoLayout extends StatelessWidget {
       child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: cartasJaJogadas.map((carta) {
+          children: widget.cartasJaJogadas.map((carta) {
             return Container(
               margin: const EdgeInsets.all(4.0),
               child: Image.asset(carta.imagePath, width: 70, height: 100),
@@ -142,13 +154,13 @@ class JogoTrucoLayout extends StatelessWidget {
       child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: jogadores[jogadorAtualIndex].mao.asMap().entries.map((entry) {
+          children: widget.jogadores[widget.jogadorAtualIndex].mao.asMap().entries.map((entry) {
             int index = entry.key;
             Carta carta = entry.value;
-            bool cartaJaJogada = cartasJaJogadas.contains(carta);
+            bool cartaJaJogada = widget.cartasJaJogadas.contains(carta);
 
             return GestureDetector(
-              onTap: rodadacontinua && !cartaJaJogada ? () => onCartaSelecionada(index) : null,
+              onTap: widget.rodadacontinua && !cartaJaJogada ? () => widget.onCartaSelecionada(index) : null,
               child: Container(
                 margin: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
@@ -174,18 +186,13 @@ class JogoTrucoLayout extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TrucoButton(onPressed: () => _onTrucoButtonPressed(context)),
+            TrucoButton(onPressed: () => trucoManager.onTrucoButtonPressed(context, widget.jogadores[widget.jogadorAtualIndex], widget.jogadores, widget.jogadorAtualIndex)),
             const SizedBox(width: 50),
             const CorrerButton(),
           ],
         ),
       ),
     );
-  }
-
-  void _onTrucoButtonPressed(BuildContext context) async {
-    Jogador jogadorQueRespondeTruco = jogadores[(jogadorAtualIndex + 1) % jogadores.length];
-    await truco.pedirTruco(context, jogadores[jogadorAtualIndex], jogadorQueRespondeTruco, jogadores);
   }
 
   Widget _buildTopInfo() {
@@ -202,7 +209,7 @@ class JogoTrucoLayout extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              'Jogador Atual: ${jogadores[jogadorAtualIndex].nome}',
+              'Jogador Atual: ${widget.jogadores[widget.jogadorAtualIndex].nome}',
               style: const TextStyle(fontSize: 20, color: Colors.white),
             ),
             const SizedBox(height: 2),

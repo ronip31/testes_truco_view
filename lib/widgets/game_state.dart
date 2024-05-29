@@ -5,8 +5,9 @@ import '../models/jogador.dart';
 import '../models/baralho.dart';
 import '../resultado_rodada.dart';
 import '../game.dart';
-import 'truco_layout.dart';
+import 'user_interface.dart';
 import '../pedir_truco.dart';
+import '../truco_manager.dart';
 
 class JogoTrucoScreen extends StatefulWidget {
   final List<Carta> cartas;
@@ -31,6 +32,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   Carta? manilha;
   OverlayEntry? _overlayEntry;
   Truco truco = Truco();
+  final TrucoManager trucoManager = TrucoManager();
 
   @override
   void initState() {
@@ -45,6 +47,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
 
   void reiniciarRodada() {
     setState(() {
+      trucoManager.limpamap();
       rodadacontinua = true;
       jogadorVencedor = null;
       cartasJaJogadas.clear();
@@ -56,7 +59,6 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
       cartasJogadasNaMesa.clear();
       resultadoRodada = '';
       jogadorAtualIndex = 0;
-      truco.jogadorQuePediuTruco = null;  // Resetar quem pediu truco ao iniciar uma nova rodada
     });
   }
 

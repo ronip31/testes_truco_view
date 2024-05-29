@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'models/carta.dart';
 import 'widgets/load_cartas.dart';
-import 'widgets/truco_screen.dart';
+import 'widgets/game_state.dart';
 
 void main() {
   List<Carta> cartas = loadCartas();

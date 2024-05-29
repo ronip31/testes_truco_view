@@ -1,8 +1,6 @@
 import 'package:tuple/tuple.dart';
-import 'dart:io';
 import '../models/carta.dart';
 import '../pedir_truco.dart';
-import 'dart:developer';
 
 class Jogador {
   Truco truco = Truco();

@@ -12,11 +12,10 @@ class Truco {
   Jogador? jogadorQuePediuTruco;
   Jogador? jogadorQueAceitouTruco;
   int pontosTruco = Truco.pontosInicial;
-  int jogadorPediuTruco = 0;
 
   Future<Tuple4<Jogador, Jogador?, int, int>> pedirTruco(BuildContext context, Jogador jogadorQuePediuTruco, Jogador jogadorQueRespondeTruco, List<Jogador> jogadores) async {
     this.jogadorQuePediuTruco = jogadorQuePediuTruco;
-    print('jogadorQuePediuTruco: $jogadorQuePediuTruco');
+    print('jogadorQuePediuTruco: ${jogadorQuePediuTruco.nome}');
     String? resposta = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
@@ -47,8 +46,6 @@ class Truco {
     switch (resposta) {
       case '1':
         trucoFoiAceito = true;
-        jogadorQueAceitouTruco = jogadorQueRespondeTruco;
-        jogadorPediuTruco = jogadores.indexOf(jogadorQuePediuTruco);
         pontosTruco = pontosInicial;
         break;
       case '2':
@@ -93,11 +90,9 @@ class Truco {
     );
 
     switch (resposta6) {
-        
       case '1':
         print('resposta6: $resposta6');
         trucoFoiAceito = true;
-        jogadorQueAceitouTruco = jogadorQuePediuTruco;
         pontosTruco = pontos_6;
         break;
       case '2':
@@ -145,7 +140,6 @@ class Truco {
       case '1':
         print('resposta9: $resposta9');
         trucoFoiAceito = true;
-        jogadorQueAceitouTruco = jogadorQueRespondeTruco;
         pontosTruco = pontos_9;
         break;
       case '2':
@@ -187,10 +181,9 @@ class Truco {
 
     switch (resposta12) {
       case '1':
-      print('resposta12: $resposta12');
+        print('resposta12: $resposta12');
         pontosTruco = pontos_12;
         trucoFoiAceito = true;
-        jogadorQueAceitouTruco = jogadorQueRespondeTruco;
         break;
       case '2':
         pontosTruco = pontos_9;
