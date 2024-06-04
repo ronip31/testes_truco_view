@@ -22,7 +22,7 @@ const CorrerButton({super.key});
           Icon(Icons.exit_to_app, color: Colors.red[900]),
           const SizedBox(width: 10),
           Text(
-            'CORRER',
+            'ESCONDER',
             style: TextStyle(
               color: Colors.red[900],
               fontSize: 20,

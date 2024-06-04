@@ -3,11 +3,11 @@ import 'package:tuple/tuple.dart';
 import '../models/carta.dart';
 import '../models/jogador.dart';
 import '../models/baralho.dart';
-import '../resultado_rodada.dart';
-import '../game.dart';
-import 'user_interface.dart';
-import '../pedir_truco.dart';
-import '../truco_manager.dart';
+import 'resultado_rodada.dart';
+import 'game.dart';
+import '../widgets/user_interface.dart';
+import 'pedir_truco.dart';
+import 'truco_manager.dart';
 
 class JogoTrucoScreen extends StatefulWidget {
   final List<Carta> cartas;
@@ -41,7 +41,8 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   }
 
   void iniciarJogo() {
-    jogadores = Jogador.criarJogadores(['Jogador 1', 'Jogador 2'], 2);
+    jogadores = Jogador.criarJogadores(['Jogador 1', 'Jogador 2'], 2);// 2 é o numero de jogadores
+
     reiniciarRodada();
   }
 

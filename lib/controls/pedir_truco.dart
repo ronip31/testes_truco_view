@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
-import 'models/jogador.dart';
+import '../models/jogador.dart';
 
 class Truco {
   static const int pontosInicial = 3;

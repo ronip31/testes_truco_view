@@ -1,8 +1,8 @@
 import 'package:tuple/tuple.dart';
-import 'models/jogador.dart';
-import '../models/carta.dart';
+import '../models/jogador.dart';
+import '../../models/carta.dart';
 import 'resultado_rodada.dart';
-import 'models/baralho.dart';
+import '../models/baralho.dart';
 
 List<Carta> mesa = [];
 

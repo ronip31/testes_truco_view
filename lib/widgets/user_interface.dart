@@ -4,8 +4,8 @@ import '../models/jogador.dart';
 import 'esconder_button.dart';
 import 'truco_button.dart';
 import '../widgets/scoreboard.dart';
-import '../pedir_truco.dart';
-import '../truco_manager.dart';
+import '../controls/pedir_truco.dart';
+import '../controls/truco_manager.dart';
 
 class JogoTrucoLayout extends StatefulWidget {
   final List<Jogador> jogadores;

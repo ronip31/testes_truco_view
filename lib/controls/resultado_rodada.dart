@@ -1,4 +1,4 @@
-import 'models/jogador.dart';
+import '../models/jogador.dart';
 
 class ResultadoRodada {
   final int numeroRodada;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
-import 'models/jogador.dart';
-import '../pedir_truco.dart';
+import '../models/jogador.dart';
+import 'pedir_truco.dart';
 
 class TrucoManager {
   Map<Jogador, Tuple2<int, int>> trucoMap = {}; // Jogador, (pontos, ordem)

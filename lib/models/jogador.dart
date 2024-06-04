@@ -1,6 +1,6 @@
 import 'package:tuple/tuple.dart';
 import '../models/carta.dart';
-import '../pedir_truco.dart';
+import '../controls/pedir_truco.dart';
 
 class Jogador {
   Truco truco = Truco();
@@ -21,12 +21,19 @@ class Jogador {
   // Método de fábrica para criar jogadores a partir de uma lista de nomes
   static List<Jogador> criarJogadores(List<String> nomes, int numeroGrupos) {
     List<Jogador> jogadores = [];
+    int grupoAtual = 1;
+
     for (int i = 0; i < nomes.length; i++) {
-      int grupo = (i < numeroGrupos) ? 1 : 1;
-      jogadores.add(Jogador(nomes[i], grupo));
+      jogadores.add(Jogador(nomes[i], grupoAtual));
+      grupoAtual = (grupoAtual % numeroGrupos) + 1;  // Alterna entre 1 e 2
+
+      for (Jogador jogador in jogadores) {
+        print('jogador.nome ${jogador.nome} e Grupo: ${jogador.grupo}');
+      }
     }
     return jogadores;
-  }
+}
+
 
   void obterCartaDaMao() {
     print('\nCartas na mão do $nome:');

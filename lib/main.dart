@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'models/carta.dart';
-import 'widgets/load_cartas.dart';
-import 'widgets/game_state.dart';
+import 'models/load_cartas.dart';
+import 'controls/game_state.dart';
 
 void main() {
   List<Carta> cartas = loadCartas();
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Jogo de Truco',
+      title: 'TRUCO ROYALE',
       theme: ThemeData(
         primarySwatch: Colors.grey,
       ),
