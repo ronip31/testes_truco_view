@@ -1,16 +1,16 @@
 class Carta {
   final String valor;
   final String naipe;
-  final String imagePath;
   bool ehManilha;
   int valorManilha;
 
   Carta({
     required this.valor,
     required this.naipe,
-    this.imagePath = '',
     this.ehManilha = false,
   }) : valorManilha = 0;
+
+  String get img => 'assets/imgs/$valor.$naipe.png';
 
   @override
   String toString() {

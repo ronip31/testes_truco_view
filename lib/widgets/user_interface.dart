@@ -15,7 +15,7 @@ class JogoTrucoLayout extends StatefulWidget {
   final Function(int) onCartaSelecionada;
   final Carta? manilha;
   final bool rodadacontinua;
-  final List<Carta> cartas;
+
   
 
   const JogoTrucoLayout({
@@ -27,7 +27,7 @@ class JogoTrucoLayout extends StatefulWidget {
     required this.onCartaSelecionada,
     this.manilha,
     required this.rodadacontinua,
-    required this.cartas,
+
   });
 
   @override
@@ -121,7 +121,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(4.0),
-          child: Image.asset(widget.manilha!.imagePath),
+          child: Image.asset(widget.manilha!.img),
         ),
       ),
     );
@@ -138,7 +138,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
           children: widget.cartasJaJogadas.map((carta) {
             return Container(
               margin: const EdgeInsets.all(4.0),
-              child: Image.asset(carta.imagePath, width: 70, height: 100),
+              child: Image.asset(carta.img, width: 70, height: 100),
             );
           }).toList(),
         ),
@@ -168,7 +168,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
                   border: Border.all(color: Colors.black),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                child: Image.asset(carta.imagePath, width: 92, height: 135, fit: BoxFit.cover),
+                child: Image.asset(carta.img, width: 92, height: 135, fit: BoxFit.cover),
               ),
             );
           }).toList(),

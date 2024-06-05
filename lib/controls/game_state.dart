@@ -10,9 +10,9 @@ import 'pedir_truco.dart';
 import 'truco_manager.dart';
 
 class JogoTrucoScreen extends StatefulWidget {
-  final List<Carta> cartas;
 
-  const JogoTrucoScreen({super.key, required this.cartas});
+
+  const JogoTrucoScreen({super.key});
 
   @override
   JogoTrucoScreenState createState() => JogoTrucoScreenState();
@@ -140,7 +140,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
       for (var jogador in jogadores) {
         int pontuacaoTotal = vencedorJogo.getPontuacaoTotal();
 
-        if (pontuacaoTotal >= 12) {
+        if (pontuacaoTotal >= 4) {
           resultadoRodada = '\nO Grupo ${jogador.nome} GANHOU jogo!';
           _showPopup(resultadoRodada);
           
@@ -223,8 +223,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
           jogarCarta(cartaSelecionada);
         }
       },
-      rodadacontinua: rodadacontinua,
-      cartas: widget.cartas, 
+      rodadacontinua: rodadacontinua, 
     );
   }
 }

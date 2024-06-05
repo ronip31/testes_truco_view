@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'models/carta.dart';
-import 'models/load_cartas.dart';
 import 'controls/game_state.dart';
 
 void main() {
-  List<Carta> cartas = loadCartas();
-  runApp(MyApp(cartas: cartas));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final List<Carta> cartas;
 
-  const MyApp({super.key, required this.cartas});
+
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.grey,
       ),
-      home: JogoTrucoScreen(cartas: cartas),
+      home: const JogoTrucoScreen(),
     );
   }
 }

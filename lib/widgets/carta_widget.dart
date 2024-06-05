@@ -25,8 +25,8 @@ class CartaWidget extends StatelessWidget {
           border: Border.all(color: Colors.black),
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: carta.imagePath.isNotEmpty
-            ? Image.asset(carta.imagePath, fit: BoxFit.cover)
+        child: carta.img.isNotEmpty
+            ? Image.asset(carta.img, fit: BoxFit.cover)
             : Card(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

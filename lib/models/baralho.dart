@@ -9,11 +9,9 @@ class Baralho {
   Baralho() {
     for (final naipe in naipes) {
       for (final valor in valores) {
-        final imagePath = 'assets/imgs/$valor.$naipe.png';
         _cartas.add(Carta(
           valor: valor,
           naipe: naipe,
-          imagePath: imagePath,
         ));
       }
     }
@@ -36,11 +34,9 @@ class Baralho {
 
     for (var valor in valores) {
       for (var naipe in naipes) {
-        final imagePath = 'assets/imgs/$valor.$naipe.png';
         var cartaPossivel = Carta(
           valor: valor,
           naipe: naipe,
-          imagePath: imagePath,
         );
         if (cartaPossivel.valorToInt() == valorProximaManilha) {
           manilhasReais.add(cartaPossivel);

@@ -29,7 +29,7 @@ class MaoJogadorWidget extends StatelessWidget {
             }
           },
           child: Container(
-            width: 80.0,
+            width: 90.0,
             height: 120.0,
             margin: const EdgeInsets.all(4.0),
             decoration: BoxDecoration(
@@ -37,8 +37,8 @@ class MaoJogadorWidget extends StatelessWidget {
               border: Border.all(color: Colors.black),
               borderRadius: BorderRadius.circular(8.0),
             ),
-            child: carta.imagePath.isNotEmpty
-              ? Image.asset(carta.imagePath, fit: BoxFit.cover)
+            child: carta.img.isNotEmpty
+              ? Image.asset(carta.img, fit: BoxFit.cover)
               : Card(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

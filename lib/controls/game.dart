@@ -68,7 +68,6 @@ Jogador? compararCartas(List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogada
   baralho.cartas[0].ehManilha = true;
 
   // Define qual carta será virada na mesa
-  // Define qual carta será virada na mesa
   manilhaGlobal = baralho.cartas.firstWhere((carta) => carta.ehManilha);
 
   print('\nA manilha VIRADA é: $manilhaGlobal');
