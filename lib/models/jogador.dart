@@ -1,6 +1,7 @@
 import 'package:tuple/tuple.dart';
 import '../models/carta.dart';
 import '../controls/pedir_truco.dart';
+import '../controls/score_manager.dart';
 
 class Jogador {
   Truco truco = Truco();
@@ -8,13 +9,11 @@ class Jogador {
   late String nome;
   List<Carta> mao = [];
   List<int> indicesSelecionados = [];
-  int pontos = 0;
-  int pontuacaoTotal = 0;
   int grupo;
-  int pontosTruco = 0;
   List<Carta> mesa = [];
   List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa = [];
-  Set<Carta> cartasJaJogadas = {}; 
+  Set<Carta> cartasJaJogadas = {};
+  Pontuacao pontuacao = Pontuacao();
 
   Jogador(this.nome, this.grupo): mao = [];
 
@@ -32,8 +31,7 @@ class Jogador {
       }
     }
     return jogadores;
-}
-
+  }
 
   void obterCartaDaMao() {
     print('\nCartas na mão do $nome:');
@@ -49,32 +47,5 @@ class Jogador {
   // Método para limpar a lista de índices das cartas selecionadas
   void limparIndicesSelecionados() {
     indicesSelecionados.clear();
-  }
-
-  void adicionarPonto() {
-    pontos++;
-  }
-
-  int getPontos() {
-    return pontos;
-  }
-
-  void adicionarPontuacaoTotalTruco(int pontosTruco) {
-    pontuacaoTotal += pontosTruco;
-    print('pontuacaoTotal = $pontuacaoTotal');
-  }
-
-  void adicionarPontuacaoTotal() {
-    pontuacaoTotal += 1;
-    print('pontuacaoTotal = $pontuacaoTotal');
-  }
-
-
-  int getPontuacaoTotal() {
-    return pontuacaoTotal;
-  }
-
-  void reiniciarPontos() {
-    pontos = 0;
   }
 }
