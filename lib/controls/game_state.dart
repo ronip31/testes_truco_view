@@ -33,6 +33,9 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   Truco truco = Truco();
   final TrucoManager trucoManager = TrucoManager();
   Pontuacao pontuacao = Pontuacao();
+  List<int> roundResults = [];
+  
+
 
   @override
   void initState() {
@@ -49,6 +52,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   // Função que reinicia a rodada
   void reiniciarRodada() {
     setState(() {
+      pontuacao.reiniciarResultadosRodadas();
       trucoManager.limpamap(); // Limpa as informações do truco
       rodadacontinua = true;
       jogadorVencedor = null;
@@ -119,13 +123,31 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   // Função que mostra o resultado da rodada
   void mostrarResultadoRodada(Jogador? jogadorVencedor) {
     setState(() {
+      // Define o resultado baseado no jogador vencedor e adiciona aos resultados das rodadas
+      int result;
+
+      if (jogadorVencedor == null) {
+        print('parte de jogador vencedor 3 bolinhas');  
+        result = 0; // Empate
+      } else if (jogadorVencedor == jogadores[0]) {
+        result = 1; // Jogador 1 venceu
+      } else {
+        result = 2; // Jogador 2 venceu
+      }
+
+      roundResults.add(result); // Adiciona o resultado da rodada
+      pontuacao.adicionarResultadoRodada(result); // Atualiza a pontuação
+     print("Results updated: $roundResults"); 
+     
+
+      // Atualiza o texto de resultado para mostrar na interface
       resultadoRodada = jogadorVencedor != null
           ? 'O ${jogadorVencedor.nome} ganhou a rodada!'
           : 'Empate!';
       rodadacontinua = false;
       _showPopup(resultadoRodada); // Mostra um popup com o resultado da rodada
     });
-
+    
     // Limpa as cartas jogadas na mesa após mostrar o resultado e reinicia a rodada
     Future.delayed(const Duration(seconds: 2), () {
       setState(() {
@@ -135,18 +157,22 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
     });
   }
 
+
   // Função que verifica se há um vencedor do jogo
   void verificarVencedorDoJogo(List<ResultadoRodada> resultadosRodadas) {
     Jogador? vencedorJogo = determinarVencedor(resultadosRodadas); // Determina o vencedor do jogo
     if (vencedorJogo != null) {
       rodadacontinua = false;
 
-      vencedorJogo.pontuacao.adicionarPontuacaoTotal(); // Adiciona a pontuação ao vencedor
+      // Adiciona a pontuação acumulada do truco ao vencedor usando TrucoManager
+      //print('Antes de adicionar a pontuação: ${trucoManager.getPontosTrucoAtual()}');
+      trucoManager.adicionarPontuacaoAoVencedor(vencedorJogo);
+      //print('Depois de adicionar a pontuação: ${vencedorJogo.pontuacao.getPontuacaoTotal()}'); // Adiciona a pontuação ao vencedor
 
       for (var jogador in jogadores) {
         int pontuacaoTotal = vencedorJogo.pontuacao.getPontuacaoTotal(); // Obtém a pontuação total
 
-        if (pontuacaoTotal >= 4) { // Verifica se a pontuação total é suficiente para ganhar o jogo
+        if (pontuacaoTotal >= 12) { // Verifica se a pontuação total é suficiente para ganhar o jogo
           resultadoRodada = '\nO Grupo ${jogador.nome} GANHOU o jogo!';
           _showPopup(resultadoRodada); // Mostra um popup com o resultado final
           break;
@@ -225,6 +251,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
       resultadoRodada: resultadoRodada,
       cartasJaJogadas: cartasJaJogadas,
       manilha: manilha,
+      pontuacao:pontuacao,
       onCartaSelecionada: (index) {
         if (index >= 0 && index < jogadores[jogadorAtualIndex].mao.length) {
           var cartaSelecionada = jogadores[jogadorAtualIndex].mao[index];

@@ -6,6 +6,7 @@ import '../widgets/truco_button.dart';
 import '../widgets/scoreboard.dart';
 import '../controls/pedir_truco.dart';
 import '../controls/truco_manager.dart';
+import '../controls/score_manager.dart';
 
 // Classe principal do layout do jogo de truco
 class JogoTrucoLayout extends StatefulWidget {
@@ -16,8 +17,9 @@ class JogoTrucoLayout extends StatefulWidget {
   final Function(int) onCartaSelecionada; // Função callback para selecionar carta
   final Carta? manilha; // Carta manilha
   final bool rodadacontinua; // Indica se a rodada continua
+  final Pontuacao pontuacao; // Instância da classe Pontuacao
 
-  const JogoTrucoLayout({
+  JogoTrucoLayout({
     super.key,
     required this.jogadores,
     required this.jogadorAtualIndex,
@@ -26,6 +28,7 @@ class JogoTrucoLayout extends StatefulWidget {
     required this.onCartaSelecionada,
     this.manilha,
     required this.rodadacontinua,
+    required this.pontuacao,
   });
 
   @override
@@ -36,18 +39,26 @@ class JogoTrucoLayout extends StatefulWidget {
 class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
   Truco truco = Truco(); // Instância da classe Truco
   final TrucoManager trucoManager = TrucoManager(); // Instância da classe TrucoManager
+  List<int> roundResults = []; // Inicializa a lista vazia para os resultados das rodadas
+  
+  // List<int> getResultadosRodadas() {
+  //   print('getResultadosRodadas123: $roundResults');
+  //   return roundResults;
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(), // Constroi a AppBar
+      appBar: _buildAppBar(), // AppBar como anteriormente definido
       body: Stack(
         children: [
-          _buildBackground(), // Constroi o fundo do jogo
-          _buildTable(), // Constroi a mesa do jogo
-          _buildPlayerHands(), // Constroi as mãos dos jogadores
-          _buildActionButtons(context), // Constroi os botões de ação
-          _buildTopInfo(), // Constroi as informações do topo
+          
+          _buildBackground(),
+          _buildTable(),
+          _buildPlayerHands(),
+          _buildActionButtons(context),
+          _buildTopInfo(),
+          
         ],
       ),
     );
@@ -56,16 +67,20 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
   // Método para construir a AppBar
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.green[800], // Cor de fundo
+      backgroundColor: Colors.green[800],
       elevation: 5,
-      toolbarHeight: 100, // Altura da AppBar
+      toolbarHeight: 120,
       title: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text('TRUCO ROYALE', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 212, 177, 18))),
           const SizedBox(height: 10),
-          // Widget de pontuação
-          PontuacaoWidget(nos: widget.jogadores[0].pontuacao.getPontuacaoTotal(), eles: widget.jogadores[1].pontuacao.getPontuacaoTotal()),
+          PontuacaoWidget(
+            key: ValueKey(roundResults.toString()),
+            nos: widget.jogadores[0].pontuacao.getPontuacaoTotal(), 
+            eles: widget.jogadores[1].pontuacao.getPontuacaoTotal(),
+            roundResults: widget.pontuacao.getResultadosRodadas(),
+          ),
         ],
       ),
       centerTitle: true,

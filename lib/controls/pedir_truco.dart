@@ -33,12 +33,12 @@ class Truco {
     switch (resposta) {
       case '0': // Aceitar truco
         trucoFoiAceito = true;
-        pontosTruco = pontosInicial;
+        pontosTruco = pontosInicial; // Define os pontos do truco para 3
         break;
       case '1': // Pedir 6
         return await pedir6(context, jogadorQueRespondeTruco, jogadorQuePediuTruco, jogadores);
       case '2': // Recusar
-        pontosTruco = 1;
+        pontosTruco = 1; // Define os pontos do truco para 1
         jogadorQuePediuTruco.pontuacao.adicionarPontuacaoTotalTruco(pontosTruco);
         break;
       default: // Opção inválida
@@ -64,12 +64,12 @@ class Truco {
       case '0': // Aceitar truco de 6 pontos
         print('resposta6: $resposta6');
         trucoFoiAceito = true;
-        pontosTruco = pontos_6;
+        pontosTruco = pontos_6; // Define os pontos do truco para 6
         break;
       case '1': // Pedir 9 pontos
         return await pedir9(context, jogadorQueResponde6, jogadorQuePediu6, jogadores);
       case '2': // Recusar
-        pontosTruco = pontosInicial;
+        pontosTruco = pontosInicial; // Define os pontos do truco para 3
         jogadorQuePediu6.pontuacao.adicionarPontuacaoTotalTruco(pontosTruco);
         break;
       default: // Opção inválida
@@ -95,12 +95,12 @@ class Truco {
       case '0': // Aceitar truco de 9 pontos
         print('resposta9: $resposta9');
         trucoFoiAceito = true;
-        pontosTruco = pontos_9;
+        pontosTruco = pontos_9; // Define os pontos do truco para 9
         break;
       case '1': // Pedir 12 pontos
         return await pedir12(context, jogadorQueResponde9, jogadorQuePediu9, jogadores);
       case '2': // Recusar
-        pontosTruco = pontos_6;
+        pontosTruco = pontos_6; // Define os pontos do truco para 6
         jogadorQuePediu9.pontuacao.adicionarPontuacaoTotalTruco(pontosTruco);
         break;
       default: // Opção inválida
@@ -125,11 +125,11 @@ class Truco {
     switch (resposta12) {
       case '0': // Aceitar truco de 12 pontos
         print('resposta12: $resposta12');
-        pontosTruco = pontos_12;
+        pontosTruco = pontos_12; // Define os pontos do truco para 12
         trucoFoiAceito = true;
         break;
       case '1': // Recusar
-        pontosTruco = pontos_9;
+        pontosTruco = pontos_9; // Define os pontos do truco para 9
         jogadorQuePediu12.pontuacao.adicionarPontuacaoTotalTruco(pontosTruco);
         break;
       default: // Opção inválida
