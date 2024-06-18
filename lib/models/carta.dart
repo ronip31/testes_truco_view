@@ -25,6 +25,9 @@ class Carta {
   }
 
   int valorToInt() {
+    if (escondida) {
+      return -1;
+    }
     switch (valor) {
       case '3':
         return 10;
@@ -46,8 +49,6 @@ class Carta {
         return 2;
       case '4':
         return 1;
-      case 'ESCONDIDA':
-        return -1; // Valor especial para cartas escondidas
       default:
         return 0;
     }
@@ -80,8 +81,10 @@ class Carta {
     valor = 'ESCONDIDA'; // Define um valor especial para cartas escondidas
   }
 
-  // Retorna o valor da carta considerando se está escondida
   int get valorParaComparacao {
-    return valorToInt();
+    if (escondida) {
+      return -1;
+    }
+    return ehManilha ? valorManilha : valorToInt();
   }
 }

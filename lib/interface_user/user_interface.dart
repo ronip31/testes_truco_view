@@ -19,7 +19,7 @@ class JogoTrucoLayout extends StatefulWidget {
   final Pontuacao pontuacao;
   final VoidCallback onEsconderPressed;
 
-  JogoTrucoLayout({
+  const JogoTrucoLayout({
     super.key,
     required this.jogadores,
     required this.jogadorAtualIndex,
@@ -57,7 +57,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
       ),
     );
   }
-
+  
   AppBar _buildAppBar() {
     return AppBar(
       backgroundColor: Colors.green[800],
@@ -91,7 +91,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
 
   Widget _buildTable() {
     return Positioned(
-      top: 120,
+      top: 100,
       left: 0,
       right: 0,
       child: Center(
@@ -205,11 +205,11 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
 
   Widget _buildTopInfo() {
     return Positioned(
-      top: 20,
+      top: 10,
       left: 40,
       right: 40,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
         decoration: BoxDecoration(
           color: Colors.black87.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
@@ -218,7 +218,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
           children: [
             Text(
               'Jogador Atual: ${widget.jogadores[widget.jogadorAtualIndex].nome}',
-              style: const TextStyle(fontSize: 20, color: Colors.white),
+              style: const TextStyle(fontSize: 15, color: Colors.white),
             ),
             const SizedBox(height: 2),
           ],

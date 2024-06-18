@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class RoundIndicator extends StatelessWidget {
   final List<Color> colors;
 
-  const RoundIndicator({Key? key, required this.colors}) : super(key: key);
+  const RoundIndicator({super.key, required this.colors});
 
   @override
   Widget build(BuildContext context) {
@@ -13,19 +13,19 @@ class RoundIndicator extends StatelessWidget {
         return Column(
           children: [
             Container(
-              width: 20,
-              height: 16,
-              margin: const EdgeInsets.all(5),
+              width: 15,
+              height: 12,
+              margin: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: index < colors.length ? colors[index] : Colors.grey,
-                border: Border.all(color: Colors.black, width: 1),
+                border: Border.all(color: Colors.black, width: 1.2),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
-                    spreadRadius: 1,
-                    blurRadius: 3,
-                    offset: Offset(0, 1),
+                    spreadRadius: 2,
+                    blurRadius: 10,
+                    offset: const Offset(0, 1),
                   ),
                 ],
               ),

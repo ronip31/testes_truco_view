@@ -5,11 +5,10 @@ import '../models/jogador.dart';
 import '../models/baralho.dart';
 import 'resultado_rodada.dart';
 import 'game.dart';
-import 'truco_manager.dart';
-import '../controls/score_manager.dart';
-import '../interface_user/popup_manager.dart';
 import '../interface_user/user_interface.dart';
 import 'pedir_truco.dart';
+import 'truco_manager.dart';
+import '../controls/score_manager.dart';
 
 class JogoTrucoScreen extends StatefulWidget {
   const JogoTrucoScreen({super.key});
@@ -30,6 +29,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   bool jogoContinua = true;
   bool rodadacontinua = true;
   Carta? manilha;
+  OverlayEntry? _overlayEntry;
   Truco truco = Truco();
   final TrucoManager trucoManager = TrucoManager();
   Pontuacao pontuacao = Pontuacao();
@@ -86,6 +86,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   void adicionarCartaNaMesa(Carta carta) {
     if (!rodadacontinua) return;
     cartasJaJogadas.add(carta);
+    print('cartasJaJogadas : $cartasJaJogadas');
     cartasJogadasNaMesa.add(Tuple2(
       jogadores[jogadorAtualIndex],
       {
@@ -94,7 +95,6 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
       },
     ));
   }
-
 
   void removerCartaDaMao(Carta carta) {
     jogadores[jogadorAtualIndex].mao.remove(carta);
@@ -121,12 +121,13 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
       roundResults.add(result);
       pontuacao.adicionarResultadoRodada(result);
 
+      print("Results updated: $roundResults");
+
       resultadoRodada = jogadorVencedor != null
           ? 'O ${jogadorVencedor.nome} ganhou a rodada!'
           : 'Empate!';
       rodadacontinua = false;
-      PopupManager.showPopup(context, resultadoRodada);
-      rodadacontinua = true;
+      _showPopup(resultadoRodada);
     });
     Future.delayed(const Duration(seconds: 1), () {
       setState(() {
@@ -148,7 +149,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
 
         if (pontuacaoTotal >= 12) {
           resultadoRodada = '\nO Grupo ${jogador.nome} GANHOU o jogo!';
-          PopupManager.showPopup(context, resultadoRodada);
+          _showPopup(resultadoRodada);
           break;
         }
       }
@@ -174,6 +175,46 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
     });
   }
 
+  void _showPopup(String message) {
+    _overlayEntry = _createOverlayEntry(message);
+    Overlay.of(context).insert(_overlayEntry!);
+    Future.delayed(const Duration(seconds: 1), () {
+      _overlayEntry?.remove();
+      rodadacontinua = true;
+    });
+  }
+
+  OverlayEntry _createOverlayEntry(String message) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).size.height / 3,
+        left: MediaQuery.of(context).size.width / 4,
+        width: MediaQuery.of(context).size.width / 2,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.black87,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontSize: 24,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void esconderCarta(Carta carta) {
     setState(() {
       carta.esconder();
@@ -184,14 +225,6 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
         rodadacontinua = false;
         processarFimDaRodada();
       }
-    });
-  }
-
-  void _showEsconderMessage() {
-    PopupManager.showEsconderMessage(context, () {
-      setState(() {
-        escondendoCarta = false;
-      });
     });
   }
 
@@ -222,6 +255,23 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
         });
         _showEsconderMessage();
       },
+    );
+  }
+
+  void _showEsconderMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Escolha uma carta para esconder ou clique em cancelar'),
+        action: SnackBarAction(
+          label: 'Cancelar',
+          onPressed: () {
+            setState(() {
+              escondendoCarta = false;
+            });
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
     );
   }
 }
