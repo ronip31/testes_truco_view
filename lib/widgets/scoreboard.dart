@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/roundIndicator.dart';
+import '../controls/score_manager.dart';
 
 class PontuacaoWidget extends StatelessWidget {
   final int nos;
@@ -49,16 +50,25 @@ class PontuacaoWidget extends StatelessWidget {
 
   Widget _buildScoreColumn(String title, int score, int player) {
     print("Results for $title: $roundResults"); // Debug para verificar os resultados recebidos
-    List<int> playerResults = roundResults.where((result) => result == player || result == 0).take(3).toList();
-    List<Color> playerColors = playerResults.map((result) {
-      return result == 0 ? Colors.yellow :
-      result == player ? Colors.green : Colors.grey;
+    List<int> playerResults = roundResults.take(3).toList();
+    List<Color> playerColors = playerResults.asMap().entries.map((entry) {
+      int index = entry.key;
+      int result = entry.value;
+      if (result == 0) return Colors.yellow; // Empate
+      if (result == player) return Colors.green; // Vitória para o jogador especificado
+      return Colors.grey; // Outro resultado ou nenhum resultado ainda
     }).toList();
+
+    // Adiciona cores cinzas se houver menos de 3 rodadas jogadas
+    while (playerColors.length < 3) {
+      playerColors.add(Colors.grey);
+    }
 
     return Column(
       children: [
         Text(title, style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
-        Text(score.toString(), style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
+        Text(score.toString(), style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold) ),
+        Text('Rodadas', style: TextStyle(fontSize: 15)),
         RoundIndicator(colors: playerColors),
       ],
     );

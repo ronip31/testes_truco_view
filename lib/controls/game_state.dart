@@ -27,15 +27,14 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   int numeroRodada = 1;
   String resultadoRodada = '';
   bool jogoContinua = true;
-  bool rodadacontinua = true; // False bloqueia as cartas restantes da mão dos jogadores
+  bool rodadacontinua = true;
   Carta? manilha;
   OverlayEntry? _overlayEntry;
   Truco truco = Truco();
   final TrucoManager trucoManager = TrucoManager();
   Pontuacao pontuacao = Pontuacao();
   List<int> roundResults = [];
-  
-
+  bool escondendoCarta = false;
 
   @override
   void initState() {
@@ -43,47 +42,47 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
     iniciarJogo();
   }
 
-  // Função que inicializa o jogo
   void iniciarJogo() {
-    jogadores = Jogador.criarJogadores(['Jogador 1', 'Jogador 2'], 2); // Cria dois jogadores
+    jogadores = Jogador.criarJogadores(['Jogador 1', 'Jogador 2'], 2);
     reiniciarRodada();
   }
 
-  // Função que reinicia a rodada
   void reiniciarRodada() {
     setState(() {
       pontuacao.reiniciarResultadosRodadas();
-      trucoManager.limpamap(); // Limpa as informações do truco
+      trucoManager.limpamap();
       rodadacontinua = true;
       jogadorVencedor = null;
       cartasJaJogadas.clear();
-      finalizarRodada(jogadores, Baralho(), 2, resultadosRodadas); // Passa as cartas carregadas para o Baralho
+      finalizarRodada(jogadores, Baralho(), 2, resultadosRodadas);
       manilha = manilhaGlobal;
       for (var jogador in jogadores) {
-        jogador.obterCartaDaMao(); // Distribui as cartas para os jogadores
+        jogador.obterCartaDaMao();
       }
       cartasJogadasNaMesa.clear();
       resultadoRodada = '';
-      jogadorAtualIndex = 0; // Reseta o índice do jogador atual
+      jogadorAtualIndex = 0;
     });
   }
 
-  // Função que processa o ato de jogar uma carta
   void jogarCarta(Carta carta) {
     if (!rodadacontinua) return;
     setState(() {
-      adicionarCartaNaMesa(carta); // Adiciona a carta jogada na mesa
-      removerCartaDaMao(carta); // Remove a carta da mão do jogador
-      atualizarJogadorAtual(); // Atualiza o jogador atual
+      if (escondendoCarta) {
+        carta.esconder();
+        escondendoCarta = false;
+      }
+      adicionarCartaNaMesa(carta);
+      removerCartaDaMao(carta);
+      atualizarJogadorAtual();
 
-      if (todosJogadoresJogaramUmaCarta()) { // Verifica se todos os jogadores jogaram uma carta
+      if (todosJogadoresJogaramUmaCarta()) {
         rodadacontinua = false;
-        processarFimDaRodada(); // Processa o fim da rodada
+        processarFimDaRodada();
       }
     });
   }
 
-  // Função que adiciona a carta na mesa
   void adicionarCartaNaMesa(Carta carta) {
     if (!rodadacontinua) return;
     cartasJaJogadas.add(carta);
@@ -92,64 +91,45 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
       jogadores[jogadorAtualIndex],
       {
         'carta': carta,
-        'valor': carta.ehManilha ? carta.valorManilha : carta.valorToInt(),
+        'valor': carta.valorParaComparacao,
       },
     ));
   }
 
-  // Função que remove a carta da mão do jogador
   void removerCartaDaMao(Carta carta) {
     jogadores[jogadorAtualIndex].mao.remove(carta);
   }
 
-  // Função que atualiza o índice do jogador atual
   void atualizarJogadorAtual() {
     jogadorAtualIndex = (jogadorAtualIndex + 1) % jogadores.length;
   }
 
-  // Função que verifica se todos os jogadores jogaram uma carta
   bool todosJogadoresJogaramUmaCarta() {
     return cartasJogadasNaMesa.length == jogadores.length;
   }
 
-  // Função que processa o fim da rodada
   void processarFimDaRodada() {
-    jogadorVencedor = compararCartas(cartasJogadasNaMesa); // Determina o vencedor da rodada
-    mostrarResultadoRodada(jogadorVencedor); // Mostra o resultado da rodada
-    resultadosRodadas.add(ResultadoRodada(numeroRodada, jogadorVencedor)); // Adiciona o resultado da rodada à lista de resultados
-    verificarVencedorDoJogo(resultadosRodadas); // Verifica se há um vencedor do jogo
+    jogadorVencedor = compararCartas(cartasJogadasNaMesa);
+    mostrarResultadoRodada(jogadorVencedor);
+    resultadosRodadas.add(ResultadoRodada(numeroRodada, jogadorVencedor));
+    verificarVencedorDoJogo(resultadosRodadas);
   }
 
-  // Função que mostra o resultado da rodada
   void mostrarResultadoRodada(Jogador? jogadorVencedor) {
     setState(() {
-      // Define o resultado baseado no jogador vencedor e adiciona aos resultados das rodadas
-      int result;
+      int result = jogadorVencedor == null ? 0 : (jogadorVencedor == jogadores[0] ? 1 : 2);
+      roundResults.add(result);
+      pontuacao.adicionarResultadoRodada(result);
 
-      if (jogadorVencedor == null) {
-        print('parte de jogador vencedor 3 bolinhas');  
-        result = 0; // Empate
-      } else if (jogadorVencedor == jogadores[0]) {
-        result = 1; // Jogador 1 venceu
-      } else {
-        result = 2; // Jogador 2 venceu
-      }
+      print("Results updated: $roundResults");
 
-      roundResults.add(result); // Adiciona o resultado da rodada
-      pontuacao.adicionarResultadoRodada(result); // Atualiza a pontuação
-     print("Results updated: $roundResults"); 
-     
-
-      // Atualiza o texto de resultado para mostrar na interface
       resultadoRodada = jogadorVencedor != null
           ? 'O ${jogadorVencedor.nome} ganhou a rodada!'
           : 'Empate!';
       rodadacontinua = false;
-      _showPopup(resultadoRodada); // Mostra um popup com o resultado da rodada
+      _showPopup(resultadoRodada);
     });
-    
-    // Limpa as cartas jogadas na mesa após mostrar o resultado e reinicia a rodada
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 1), () {
       setState(() {
         cartasJogadasNaMesa.clear();
         cartasJaJogadas.clear();
@@ -157,61 +137,53 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
     });
   }
 
-
-  // Função que verifica se há um vencedor do jogo
   void verificarVencedorDoJogo(List<ResultadoRodada> resultadosRodadas) {
-    Jogador? vencedorJogo = determinarVencedor(resultadosRodadas); // Determina o vencedor do jogo
+    Jogador? vencedorJogo = determinarVencedor(resultadosRodadas);
     if (vencedorJogo != null) {
       rodadacontinua = false;
 
-      // Adiciona a pontuação acumulada do truco ao vencedor usando TrucoManager
-      //print('Antes de adicionar a pontuação: ${trucoManager.getPontosTrucoAtual()}');
       trucoManager.adicionarPontuacaoAoVencedor(vencedorJogo);
-      //print('Depois de adicionar a pontuação: ${vencedorJogo.pontuacao.getPontuacaoTotal()}'); // Adiciona a pontuação ao vencedor
 
       for (var jogador in jogadores) {
-        int pontuacaoTotal = vencedorJogo.pontuacao.getPontuacaoTotal(); // Obtém a pontuação total
+        int pontuacaoTotal = vencedorJogo.pontuacao.getPontuacaoTotal();
 
-        if (pontuacaoTotal >= 12) { // Verifica se a pontuação total é suficiente para ganhar o jogo
+        if (pontuacaoTotal >= 12) {
           resultadoRodada = '\nO Grupo ${jogador.nome} GANHOU o jogo!';
-          _showPopup(resultadoRodada); // Mostra um popup com o resultado final
+          _showPopup(resultadoRodada);
           break;
         }
       }
 
       if (jogoContinua) {
         Future.delayed(const Duration(seconds: 5), () {
-          reiniciarRodada(); // Reinicia a rodada
+          reiniciarRodada();
         });
       }
     }
   }
 
-  // Função que reinicia o jogo
   void reiniciarJogo() {
     setState(() {
-      jogadores = Jogador.criarJogadores(['Jogador 1', 'Jogador 2'], 2); // Cria novos jogadores
-      resultadosRodadas.clear(); // Limpa os resultados das rodadas
+      jogadores = Jogador.criarJogadores(['Jogador 1', 'Jogador 2'], 2);
+      resultadosRodadas.clear();
       jogadorVencedor = null;
       numeroRodada = 1;
       resultadoRodada = '';
       jogoContinua = true;
       rodadacontinua = true;
-      reiniciarRodada(); // Reinicia a rodada
+      reiniciarRodada();
     });
   }
 
-  // Função que mostra um popup com uma mensagem
   void _showPopup(String message) {
-    _overlayEntry = _createOverlayEntry(message); // Cria um overlay com a mensagem
-    Overlay.of(context).insert(_overlayEntry!); // Insere o overlay na tela
-    Future.delayed(const Duration(seconds: 2), () {
-      _overlayEntry?.remove(); // Remove o overlay após 2 segundos
+    _overlayEntry = _createOverlayEntry(message);
+    Overlay.of(context).insert(_overlayEntry!);
+    Future.delayed(const Duration(seconds: 1), () {
+      _overlayEntry?.remove();
       rodadacontinua = true;
     });
   }
 
-  // Função que cria um overlay com uma mensagem
   OverlayEntry _createOverlayEntry(String message) {
     return OverlayEntry(
       builder: (context) => Positioned(
@@ -243,6 +215,19 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
     );
   }
 
+  void esconderCarta(Carta carta) {
+    setState(() {
+      carta.esconder();
+      adicionarCartaNaMesa(carta);
+      removerCartaDaMao(carta);
+      atualizarJogadorAtual();
+      if (todosJogadoresJogaramUmaCarta()) {
+        rodadacontinua = false;
+        processarFimDaRodada();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return JogoTrucoLayout(
@@ -251,14 +236,42 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
       resultadoRodada: resultadoRodada,
       cartasJaJogadas: cartasJaJogadas,
       manilha: manilha,
-      pontuacao:pontuacao,
+      pontuacao: pontuacao,
       onCartaSelecionada: (index) {
         if (index >= 0 && index < jogadores[jogadorAtualIndex].mao.length) {
           var cartaSelecionada = jogadores[jogadorAtualIndex].mao[index];
-          jogarCarta(cartaSelecionada); // Joga a carta selecionada
+          if (escondendoCarta) {
+            esconderCarta(cartaSelecionada);
+            escondendoCarta = false;
+          } else {
+            jogarCarta(cartaSelecionada);
+          }
         }
       },
-      rodadacontinua: rodadacontinua, 
+      rodadacontinua: rodadacontinua,
+      onEsconderPressed: () {
+        setState(() {
+          escondendoCarta = true;
+        });
+        _showEsconderMessage();
+      },
+    );
+  }
+
+  void _showEsconderMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Escolha uma carta para esconder ou clique em cancelar'),
+        action: SnackBarAction(
+          label: 'Cancelar',
+          onPressed: () {
+            setState(() {
+              escondendoCarta = false;
+            });
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
     );
   }
 }

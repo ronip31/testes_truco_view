@@ -13,13 +13,15 @@ Jogador? compararCartas(List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogada
 
     // Inicializa a carta vencedora com a primeira carta jogada
     var cartaVencedora = cartasJogadasNaMesa[0];
+    
 
     // Percorre as cartas jogadas na mesa a partir da segunda carta
     for (var i = 1; i < cartasJogadasNaMesa.length; i++) {
       var cartaJogada = cartasJogadasNaMesa[i];
       var valorCarta = cartaJogada.item2['valor'];
       var valorCartaVencedora = cartaVencedora.item2['valor'];
-
+      
+      print('cartasJogadasNaMesa $cartasJogadasNaMesa');
       // Se o valor da carta atual for maior que o da carta vencedora atual,
       // atualiza a carta vencedora para a carta atual
       if (valorCarta > valorCartaVencedora) {

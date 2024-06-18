@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
 class CorrerButton extends StatelessWidget {
-const CorrerButton({super.key});
+  final VoidCallback onEsconderPressed;
+
+  const CorrerButton({super.key, required this.onEsconderPressed});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: onEsconderPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor:const Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         textStyle: const TextStyle(fontSize: 20, color: Color.fromARGB(255, 255, 0, 0)),
         shape: RoundedRectangleBorder(

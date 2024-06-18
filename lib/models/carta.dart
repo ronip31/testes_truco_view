@@ -1,16 +1,23 @@
 class Carta {
-  final String valor;
-  final String naipe;
+  String valor;
+  String naipe;
   bool ehManilha;
   int valorManilha;
+  bool escondida;
 
   Carta({
     required this.valor,
     required this.naipe,
     this.ehManilha = false,
+    this.escondida = false,
   }) : valorManilha = 0;
 
-  String get img => 'assets/imgs/$valor.$naipe.png';
+  String get img {
+    if (escondida) {
+      return 'assets/imgs/fundocarta.jpg';
+    }
+    return 'assets/imgs/$valor.$naipe.png';
+  }
 
   @override
   String toString() {
@@ -39,6 +46,8 @@ class Carta {
         return 2;
       case '4':
         return 1;
+      case 'ESCONDIDA':
+        return -1; // Valor especial para cartas escondidas
       default:
         return 0;
     }
@@ -65,6 +74,14 @@ class Carta {
       }
     }
   }
+
+  void esconder() {
+    escondida = true;
+    valor = 'ESCONDIDA'; // Define um valor especial para cartas escondidas
+  }
+
+  // Retorna o valor da carta considerando se está escondida
+  int get valorParaComparacao {
+    return valorToInt();
+  }
 }
-
-

@@ -8,16 +8,16 @@ import '../controls/pedir_truco.dart';
 import '../controls/truco_manager.dart';
 import '../controls/score_manager.dart';
 
-// Classe principal do layout do jogo de truco
 class JogoTrucoLayout extends StatefulWidget {
-  final List<Jogador> jogadores; // Lista de jogadores
-  final int jogadorAtualIndex; // Índice do jogador atual
-  final String resultadoRodada; // Resultado da rodada atual
-  final List<Carta> cartasJaJogadas; // Cartas já jogadas na mesa
-  final Function(int) onCartaSelecionada; // Função callback para selecionar carta
-  final Carta? manilha; // Carta manilha
-  final bool rodadacontinua; // Indica se a rodada continua
-  final Pontuacao pontuacao; // Instância da classe Pontuacao
+  final List<Jogador> jogadores;
+  final int jogadorAtualIndex;
+  final String resultadoRodada;
+  final List<Carta> cartasJaJogadas;
+  final Function(int) onCartaSelecionada;
+  final Carta? manilha;
+  final bool rodadacontinua;
+  final Pontuacao pontuacao;
+  final VoidCallback onEsconderPressed;
 
   JogoTrucoLayout({
     super.key,
@@ -29,42 +29,35 @@ class JogoTrucoLayout extends StatefulWidget {
     this.manilha,
     required this.rodadacontinua,
     required this.pontuacao,
+    required this.onEsconderPressed,
   });
 
   @override
   JogoTrucoLayoutState createState() => JogoTrucoLayoutState();
 }
 
-// Classe de estado do layout do jogo de truco
 class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
-  Truco truco = Truco(); // Instância da classe Truco
-  final TrucoManager trucoManager = TrucoManager(); // Instância da classe TrucoManager
-  List<int> roundResults = []; // Inicializa a lista vazia para os resultados das rodadas
-  
-  // List<int> getResultadosRodadas() {
-  //   print('getResultadosRodadas123: $roundResults');
-  //   return roundResults;
-  // }
+  Truco truco = Truco();
+  final TrucoManager trucoManager = TrucoManager();
+  List<int> roundResults = [];
+  bool escondendoCarta = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(), // AppBar como anteriormente definido
+      appBar: _buildAppBar(),
       body: Stack(
         children: [
-          
           _buildBackground(),
           _buildTable(),
           _buildPlayerHands(),
           _buildActionButtons(context),
           _buildTopInfo(),
-          
         ],
       ),
     );
   }
 
-  // Método para construir a AppBar
   AppBar _buildAppBar() {
     return AppBar(
       backgroundColor: Colors.green[800],
@@ -77,7 +70,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
           const SizedBox(height: 10),
           PontuacaoWidget(
             key: ValueKey(roundResults.toString()),
-            nos: widget.jogadores[0].pontuacao.getPontuacaoTotal(), 
+            nos: widget.jogadores[0].pontuacao.getPontuacaoTotal(),
             eles: widget.jogadores[1].pontuacao.getPontuacaoTotal(),
             roundResults: widget.pontuacao.getResultadosRodadas(),
           ),
@@ -87,7 +80,6 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
     );
   }
 
-  // Método para construir o fundo do jogo
   Widget _buildBackground() {
     return Positioned.fill(
       child: Image.asset(
@@ -97,7 +89,6 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
     );
   }
 
-  // Método para construir a mesa do jogo
   Widget _buildTable() {
     return Positioned(
       top: 120,
@@ -113,8 +104,8 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
           ),
           child: Stack(
             children: [
-              if (widget.manilha != null) _buildManilha(), // Constroi a manilha se ela existir
-              _buildPlayedCards(), // Constroi as cartas jogadas
+              if (widget.manilha != null) _buildManilha(),
+              _buildPlayedCards(),
             ],
           ),
         ),
@@ -122,7 +113,6 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
     );
   }
 
-  // Método para construir a carta manilha
   Widget _buildManilha() {
     return Positioned(
       top: 10,
@@ -137,13 +127,12 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(4.0),
-          child: Image.asset(widget.manilha!.img), // Imagem da carta manilha
+          child: Image.asset(widget.manilha!.img),
         ),
       ),
     );
   }
 
-  // Método para construir as cartas jogadas na mesa
   Widget _buildPlayedCards() {
     return Positioned(
       bottom: 50,
@@ -155,7 +144,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
           children: widget.cartasJaJogadas.map((carta) {
             return Container(
               margin: const EdgeInsets.all(4.0),
-              child: Image.asset(carta.img, width: 70, height: 100), // Imagem da carta jogada
+              child: Image.asset(carta.img, width: 70, height: 100),
             );
           }).toList(),
         ),
@@ -163,7 +152,6 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
     );
   }
 
-  // Método para construir as mãos dos jogadores
   Widget _buildPlayerHands() {
     return Positioned(
       bottom: 70,
@@ -178,7 +166,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
             bool cartaJaJogada = widget.cartasJaJogadas.contains(carta);
 
             return GestureDetector(
-              onTap: widget.rodadacontinua && !cartaJaJogada ? () => widget.onCartaSelecionada(index) : null, // Ação ao selecionar carta
+              onTap: widget.rodadacontinua && !cartaJaJogada ? () => widget.onCartaSelecionada(index) : null,
               child: Container(
                 margin: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
@@ -186,7 +174,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
                   border: Border.all(color: Colors.black),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                child: Image.asset(carta.img, width: 92, height: 135, fit: BoxFit.cover), // Imagem da carta na mão do jogador
+                child: Image.asset(carta.img, width: 92, height: 135, fit: BoxFit.cover),
               ),
             );
           }).toList(),
@@ -195,7 +183,6 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
     );
   }
 
-  // Método para construir os botões de ação (Truco e Correr)
   Widget _buildActionButtons(BuildContext context) {
     return Positioned(
       bottom: 25,
@@ -205,18 +192,17 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Botão Truco
             TrucoButton(onPressed: () => trucoManager.onTrucoButtonPressed(context, widget.jogadores[widget.jogadorAtualIndex], widget.jogadores, widget.jogadorAtualIndex)),
             const SizedBox(width: 50),
-            // Botão Correr
-            const CorrerButton(),
+            CorrerButton(
+              onEsconderPressed: widget.onEsconderPressed,
+            ),
           ],
         ),
       ),
     );
   }
 
-  // Método para construir as informações do topo (jogador atual)
   Widget _buildTopInfo() {
     return Positioned(
       top: 20,
