@@ -40,6 +40,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   List<int> roundResults = [];
   bool escondendoCarta = false;
   bool gameReady = false;
+  late Jogador jogadorAtual;
 
   @override
   void initState() {
@@ -47,33 +48,121 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
     _initializeGame();
   }
 
+  // Inicializa o jogo, configurando o listener para o documento da sala no Firestore
   void _initializeGame() async {
-    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
+  final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
 
-    roomRef.snapshots().listen((snapshot) {
-      if (snapshot.exists) {
-        final data = snapshot.data() as Map<String, dynamic>;
-        final List<dynamic> players = data['players'];
-        print('players: $players');
-        if (players.length == 2 && jogadores.isEmpty) {
-          setState(() {
-            jogadores = Jogador.criarJogadores(players.cast<String>(), 2);
+  roomRef.snapshots().listen((snapshot) {
+    if (snapshot.exists && mounted) {
+      final data = snapshot.data() as Map<String, dynamic>;
+      final List<dynamic>? players = data['players'];
+      if (players != null && players.length == 2) {
+        setState(() {
+          jogadores = Jogador.criarJogadores(players.cast<String>(), 2);
+          jogadorAtual = jogadores.firstWhere((jogador) => jogador.nome == widget.playerName);
+          print('jogadorAtual: ${jogadorAtual.nome}');
+          
+          // Jogador 1 distribui as cartas se ainda não foram distribuídas
+          if (players[0] == widget.playerName && data['gameState'] == null) {
+            _distributeCards(roomRef);
+          } else {
             _loadGameState(data['gameState']);
-          });
-        }
+          }
+        });
+      }
+    }
+  });
+}
+
+
+
+ // Distribui as cartas entre os jogadores e atualiza o estado no Firestore
+  void _distributeCards(DocumentReference roomRef) async {
+  final baralho = Baralho();
+  baralho.embaralhar();
+  final todasMaosJogadores = baralho.distribuirCartasParaJogadores(2);
+
+  final cartasJogador1 = todasMaosJogadores[0].map((carta) => carta.toString()).toList();
+  final cartasJogador2 = todasMaosJogadores[1].map((carta) => carta.toString()).toList();
+
+  print('cartasJogador1 $cartasJogador1');
+  print('cartasJogador2 $cartasJogador2');
+  baralho.cartas[0].ehManilha = true;
+  final manilhaGlobal = baralho.cartas.firstWhere((carta) => carta.ehManilha).toString();
+
+  await roomRef.set({
+    'gameState': {
+      'manilha': manilhaGlobal,
+      'cartasJogador1': cartasJogador1,
+      'cartasJogador2': cartasJogador2,
+    }
+  }).then((_) {
+    if (mounted) {
+      setState(() {
+        gameReady = true;
+      });
+    }
+  });
+}
+
+
+  // Carrega o estado do jogo do Firestore
+  void _loadGameState(Map<String, dynamic>? gameState) {
+  if (gameState != null && mounted) {
+    setState(() {
+      manilha = Carta.fromString(gameState['manilha']);
+      if (jogadorAtual.nome == jogadores[0].nome) {
+        jogadorAtual.mao = (gameState['cartasJogador1'] as List).map((cartaMap) => Carta.fromString(cartaMap)).toList();
+        print('jogadorAtual.mao1 ${jogadorAtual.mao} e ${jogadorAtual.nome}');
+      } else if (jogadorAtual.nome == jogadores[1].nome) {
+        jogadorAtual.mao = (gameState['cartasJogador2'] as List).map((cartaMap) => Carta.fromString(cartaMap)).toList();
+        print('jogadorAtual.mao2 ${jogadorAtual.mao} e ${jogadorAtual.nome}');
+      }
+      gameReady = true;
+    });
+  }
+}
+
+
+
+  // Sincroniza o estado do jogo no Firestore
+  void _syncGameState() {
+    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
+    roomRef.update({
+      'gameState': {
+        'jogadorAtualIndex': jogadorAtualIndex,
+        'cartasJogadasNaMesa': cartasJogadasNaMesa.map((e) => {
+          'jogador': e.item1.nome,
+          'carta': e.item2['carta'].toString(),
+          'valor': e.item2['valor']
+        }).toList(),
+        'cartasJaJogadas': cartasJaJogadas.map((carta) => carta.toString()).toList(),
+        'resultadosRodadas': resultadosRodadas.map((resultado) => {
+          'numeroRodada': resultado.numeroRodada,
+          'jogadorVencedor': resultado.jogadorVencedor?.nome
+        }).toList(),
+        'rodadacontinua': rodadacontinua,
+        'resultadoRodada': resultadoRodada,
+        'roundResults': roundResults
       }
     });
   }
 
-  void _loadGameState(Map<String, dynamic> gameState) {
-    setState(() {
-      manilha = Carta.fromString(gameState['manilha']);
-      jogadores[0].mao = (gameState['cartasJogador1'] as List).map((cartaStr) => Carta.fromString(cartaStr)).toList();
-      jogadores[1].mao = (gameState['cartasJogador2'] as List).map((cartaStr) => Carta.fromString(cartaStr)).toList();
-      gameReady = true;
+  // Função adicional para atualizar as cartas na mesa
+  void _syncMesaState() {
+    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
+    roomRef.update({
+      'mesaState': {
+        'cartasJogadasNaMesa': cartasJogadasNaMesa.map((e) => {
+          'jogador': e.item1.nome,
+          'carta': e.item2['carta'].toString(),
+          'valor': e.item2['valor']
+        }).toList(),
+      }
     });
   }
 
+  // Ações ao jogar uma carta
   void jogarCarta(Carta carta) {
     if (!rodadacontinua) return;
     setState(() {
@@ -91,8 +180,10 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
       }
     });
     _syncGameState();
+    _syncMesaState();
   }
 
+  // Adiciona a carta na mesa
   void adicionarCartaNaMesa(Carta carta) {
     if (!rodadacontinua) return;
     cartasJaJogadas.add(carta);
@@ -105,18 +196,22 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
     ));
   }
 
+  // Remove a carta da mão do jogador
   void removerCartaDaMao(Carta carta) {
     jogadores[jogadorAtualIndex].mao.remove(carta);
   }
 
+  // Atualiza o índice do jogador atual
   void atualizarJogadorAtual() {
     jogadorAtualIndex = (jogadorAtualIndex + 1) % jogadores.length;
   }
 
+  // Verifica se todos os jogadores jogaram uma carta
   bool todosJogadoresJogaramUmaCarta() {
     return cartasJogadasNaMesa.length == jogadores.length;
   }
 
+  // Processa o fim da rodada
   void processarFimDaRodada() {
     jogadorVencedor = compararCartas(cartasJogadasNaMesa);
     mostrarResultadoRodada(jogadorVencedor);
@@ -124,6 +219,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
     verificarVencedorDoJogo(resultadosRodadas);
   }
 
+  // Mostra o resultado da rodada
   void mostrarResultadoRodada(Jogador? jogadorVencedor) {
     setState(() {
       int result = jogadorVencedor == null ? 0 : (jogadorVencedor == jogadores[0] ? 1 : 2);
@@ -145,6 +241,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
     _syncGameState();
   }
 
+  // Verifica o vencedor do jogo
   void verificarVencedorDoJogo(List<ResultadoRodada> resultadosRodadas) {
     Jogador? vencedorJogo = determinarVencedor(resultadosRodadas);
     if (vencedorJogo != null) {
@@ -170,6 +267,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
     }
   }
 
+  // Reinicia a rodada
   void reiniciarRodada() {
     setState(() {
       resultadosRodadas.clear();
@@ -181,6 +279,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
     });
   }
 
+  // Exibe uma mensagem popup na tela
   void _showPopup(String message) {
     _overlayEntry = _createOverlayEntry(message);
     Overlay.of(context).insert(_overlayEntry!);
@@ -221,6 +320,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
     );
   }
 
+  // Esconde a carta
   void esconderCarta(Carta carta) {
     setState(() {
       carta.esconder();
@@ -233,28 +333,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
       }
     });
     _syncGameState();
-  }
-
-  void _syncGameState() {
-    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
-    roomRef.update({
-      'gameState': {
-        'jogadorAtualIndex': jogadorAtualIndex,
-        'cartasJogadasNaMesa': cartasJogadasNaMesa.map((e) => {
-          'jogador': e.item1.nome,
-          'carta': e.item2['carta'].toString(),
-          'valor': e.item2['valor']
-        }).toList(),
-        'cartasJaJogadas': cartasJaJogadas.map((carta) => carta.toString()).toList(),
-        'resultadosRodadas': resultadosRodadas.map((resultado) => {
-          'numeroRodada': resultado.numeroRodada,
-          'jogadorVencedor': resultado.jogadorVencedor?.nome
-        }).toList(),
-        'rodadacontinua': rodadacontinua,
-        'resultadoRodada': resultadoRodada,
-        'roundResults': roundResults
-      }
-    });
+    _syncMesaState();
   }
 
   @override
@@ -269,12 +348,10 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
         ),
       );
     }
-
-    final jogadorAtual = widget.playerName == jogadores[0].nome ? jogadores[0] : jogadores[1];
+    //final jogadorAtual = jogadores.firstWhere((jogador) => jogador.nome == widget.playerName);
 
     return JogoTrucoLayout(
       jogadorAtual: jogadorAtual,
-      jogadores: jogadores,
       resultadoRodada: resultadoRodada,
       cartasJaJogadas: cartasJaJogadas,
       manilha: manilha,

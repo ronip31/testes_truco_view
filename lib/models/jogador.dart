@@ -27,7 +27,7 @@ class Jogador {
       grupoAtual = (grupoAtual % numeroGrupos) + 1;  // Alterna entre 1 e 2
 
       for (Jogador jogador in jogadores) {
-        print('jogador ${jogador.nome} do Grupo: ${jogador.grupo}');
+        print('Jogador: ${jogador.nome} do Grupo: ${jogador.grupo}');
       }
     }
     return jogadores;

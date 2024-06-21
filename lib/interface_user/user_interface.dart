@@ -9,8 +9,7 @@ import '../controls/truco_manager.dart';
 import '../controls/score_manager.dart';
 
 class JogoTrucoLayout extends StatefulWidget {
-  final Jogador jogadorAtual;
-  final List<Jogador> jogadores;
+  final Jogador jogadorAtual;  // Atualizamos para receber apenas o jogador atual
   final String resultadoRodada;
   final List<Carta> cartasJaJogadas;
   final Function(int) onCartaSelecionada;
@@ -22,7 +21,6 @@ class JogoTrucoLayout extends StatefulWidget {
   const JogoTrucoLayout({
     Key? key,
     required this.jogadorAtual,
-    required this.jogadores,
     required this.resultadoRodada,
     required this.cartasJaJogadas,
     required this.onCartaSelecionada,
@@ -70,8 +68,8 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
           const SizedBox(height: 10),
           PontuacaoWidget(
             key: ValueKey(roundResults.toString()),
-            nos: widget.jogadores[0].pontuacao.getPontuacaoTotal(),
-            eles: widget.jogadores[1].pontuacao.getPontuacaoTotal(),
+            nos: widget.jogadorAtual.pontuacao.getPontuacaoTotal(),
+            eles: widget.jogadorAtual.pontuacao.getPontuacaoTotal(),  // Atualize conforme a lógica de pontuação do adversário
             roundResults: widget.pontuacao.getResultadosRodadas(),
           ),
         ],
@@ -192,7 +190,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TrucoButton(onPressed: () => trucoManager.onTrucoButtonPressed(context, widget.jogadorAtual, widget.jogadores, widget.jogadores.indexOf(widget.jogadorAtual))),
+            TrucoButton(onPressed: () => trucoManager.onTrucoButtonPressed(context, widget.jogadorAtual, [widget.jogadorAtual], 0)),  // Ajuste conforme a lógica de truco
             const SizedBox(width: 50),
             CorrerButton(
               onEsconderPressed: widget.onEsconderPressed,

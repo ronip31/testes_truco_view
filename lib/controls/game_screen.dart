@@ -62,7 +62,7 @@ class _GameScreenState extends State<GameScreen> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _startGame,
-                    child: const Text('COMEÇAR'),
+                    child: const Text('COMEÇAR!'),
                   ),
                 ],
               )
