@@ -21,7 +21,17 @@ class Carta {
 
   @override
   String toString() {
-    return '{$valor,$naipe}';
+    return '$valor,$naipe,$ehManilha,$valorManilha,$escondida';
+  }
+
+  static Carta fromString(String cartaStr) {
+    var parts = cartaStr.split(',');
+    return Carta(
+      valor: parts[0],
+      naipe: parts[1],
+      ehManilha: parts[2] == 'true',
+      escondida: parts[4] == 'true',
+    );
   }
 
   int valorToInt() {

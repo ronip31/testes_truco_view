@@ -9,8 +9,8 @@ import '../controls/truco_manager.dart';
 import '../controls/score_manager.dart';
 
 class JogoTrucoLayout extends StatefulWidget {
+  final Jogador jogadorAtual;
   final List<Jogador> jogadores;
-  final int jogadorAtualIndex;
   final String resultadoRodada;
   final List<Carta> cartasJaJogadas;
   final Function(int) onCartaSelecionada;
@@ -20,9 +20,9 @@ class JogoTrucoLayout extends StatefulWidget {
   final VoidCallback onEsconderPressed;
 
   const JogoTrucoLayout({
-    super.key,
+    Key? key,
+    required this.jogadorAtual,
     required this.jogadores,
-    required this.jogadorAtualIndex,
     required this.resultadoRodada,
     required this.cartasJaJogadas,
     required this.onCartaSelecionada,
@@ -30,7 +30,7 @@ class JogoTrucoLayout extends StatefulWidget {
     required this.rodadacontinua,
     required this.pontuacao,
     required this.onEsconderPressed,
-  });
+  }) : super(key: key);
 
   @override
   JogoTrucoLayoutState createState() => JogoTrucoLayoutState();
@@ -57,7 +57,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
       ),
     );
   }
-  
+
   AppBar _buildAppBar() {
     return AppBar(
       backgroundColor: Colors.green[800],
@@ -160,7 +160,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
       child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: widget.jogadores[widget.jogadorAtualIndex].mao.asMap().entries.map((entry) {
+          children: widget.jogadorAtual.mao.asMap().entries.map((entry) {
             int index = entry.key;
             Carta carta = entry.value;
             bool cartaJaJogada = widget.cartasJaJogadas.contains(carta);
@@ -192,7 +192,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TrucoButton(onPressed: () => trucoManager.onTrucoButtonPressed(context, widget.jogadores[widget.jogadorAtualIndex], widget.jogadores, widget.jogadorAtualIndex)),
+            TrucoButton(onPressed: () => trucoManager.onTrucoButtonPressed(context, widget.jogadorAtual, widget.jogadores, widget.jogadores.indexOf(widget.jogadorAtual))),
             const SizedBox(width: 50),
             CorrerButton(
               onEsconderPressed: widget.onEsconderPressed,
@@ -217,7 +217,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
         child: Column(
           children: [
             Text(
-              'Jogador Atual: ${widget.jogadores[widget.jogadorAtualIndex].nome}',
+              'Jogador Atual: ${widget.jogadorAtual.nome}',
               style: const TextStyle(fontSize: 15, color: Colors.white),
             ),
             const SizedBox(height: 2),
