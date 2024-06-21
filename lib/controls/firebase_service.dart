@@ -6,19 +6,18 @@ import 'resultado_rodada.dart';
 
 class FirebaseService {
   final String roomId;
-  List<ResultadoRodada> resultadosRodadas = [];
 
   FirebaseService(this.roomId);
 
   // Método para distribuir as cartas e atualizar o estado no Firestore
-  Future<void> distributeCards(cartasJogador1,cartasJogador2, String manilhaGlobal) async {
+  Future<void> distributeCards(List<String> cartasJogador1, List<String> cartasJogador2, String manilhaGlobal) async {
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
 
     await roomRef.update({
       'gameState': {
         'manilha': manilhaGlobal,
-        'cartasJogador1': cartasJogador1.map((carta) => carta.toString()).toList(),
-        'cartasJogador2': cartasJogador2.map((carta) => carta.toString()).toList(),
+        'cartasJogador1': cartasJogador1,
+        'cartasJogador2': cartasJogador2,
       }
     });
   }
@@ -26,7 +25,8 @@ class FirebaseService {
   // Método para sincronizar o estado da mesa no Firestore
   Future<void> syncMesaState(int jogadorAtualIndex, List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa) async {
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
-
+    print('Função syncMesaState ${jogadorAtualIndex} e cartasJogadasNaMesa: ${cartasJogadasNaMesa}');
+    print('Função syncMesaState roomRef: ${roomRef} ');
     await roomRef.update({
       'mesaState': {
         'jogadorAtualIndex': jogadorAtualIndex,
@@ -42,7 +42,7 @@ class FirebaseService {
   // Método para sincronizar o estado do jogo no Firestore
   Future<void> syncGameState(int jogadorAtualIndex, List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa, List<Carta> cartasJaJogadas, List<ResultadoRodada> resultadosRodadas, bool rodadacontinua, String resultadoRodada, List<int> roundResults) async {
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
-
+    print('Função syncGameState roomRef: ${roomRef} ');
     await roomRef.update({
       'gameState': {
         'jogadorAtualIndex': jogadorAtualIndex,
@@ -66,6 +66,7 @@ class FirebaseService {
   // Método para carregar o estado do jogo do Firestore
   Future<Map<String, dynamic>?> loadGameState() async {
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
+    print('Função loadGameState roomRef: ${roomRef} ');
     final snapshot = await roomRef.get();
     return snapshot.data();
   }

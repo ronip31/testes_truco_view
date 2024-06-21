@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.grey,
       ),
-      home: RoomSelectionScreen(),
+      home: const RoomSelectionScreen(),
     );
   }
 }

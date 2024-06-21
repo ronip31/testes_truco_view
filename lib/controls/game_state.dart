@@ -43,6 +43,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   bool gameReady = false;
   late Jogador jogadorAtual;
   late FirebaseService firebaseService;
+  bool gameStateLoaded = false; // Nova variável
 
   @override
   void initState() {
@@ -55,7 +56,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   void _initializeGame() async {
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
 
-    roomRef.snapshots().listen((snapshot) async {
+    roomRef.snapshots().listen((snapshot) {
       if (snapshot.exists && mounted) {
         final data = snapshot.data() as Map<String, dynamic>;
         final List<dynamic>? players = data['players'];
@@ -65,13 +66,13 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
           print('jogadorAtual: ${jogadorAtual.nome}');
           if (players[0] == widget.playerName && data['gameState'] == null) {
             _distributeCards();
-          } else {
+          } else if (!gameStateLoaded) { // Verifica se o estado do jogo já foi carregado
             _loadGameState(data['gameState']);
           }
           if (mounted) {
             setState(() {});
           }
-        } else if (data['gameState'] != null) {
+        } else if (data['gameState'] != null && !gameStateLoaded) { // Verifica se o estado do jogo já foi carregado
           _loadGameState(data['gameState']);
         }
       }
@@ -114,6 +115,7 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
           print('jogadorAtual.mao2 ${jogadorAtual.mao} e ${jogadorAtual.nome}');
         }
         gameReady = true;
+        gameStateLoaded = true; // Atualiza o indicador
       });
     }
   }
@@ -127,7 +129,15 @@ class JogoTrucoScreenState extends State<JogoTrucoScreen> {
   // Sincroniza o estado do jogo no Firestore
   void _syncGameState() {
     if (!mounted) return;
-    firebaseService.syncGameState(jogadorAtualIndex, cartasJogadasNaMesa, cartasJaJogadas, resultadosRodadas, rodadacontinua, resultadoRodada, roundResults);
+    firebaseService.syncGameState(
+      jogadorAtualIndex,
+      cartasJogadasNaMesa,
+      cartasJaJogadas,
+      resultadosRodadas,
+      rodadacontinua,
+      resultadoRodada,
+      roundResults,
+    );
   }
 
   // Ações ao jogar uma carta
