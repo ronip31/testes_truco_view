@@ -28,6 +28,7 @@ class JogoTrucoLayout extends StatefulWidget {
     required this.rodadacontinua,
     required this.pontuacao,
     required this.onEsconderPressed,
+    
   }) : super(key: key);
 
   @override
