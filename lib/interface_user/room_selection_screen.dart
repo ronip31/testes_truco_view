@@ -1,3 +1,4 @@
+import 'dart:async'; // Importação necessária para StreamSubscription
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/playernameform.dart'; 
@@ -18,6 +19,13 @@ class _RoomSelectionScreenState extends State<RoomSelectionScreen> {
   String? _roomId;
   bool _waitingForOpponent = false;
   bool isServer = false;
+  StreamSubscription<DocumentSnapshot>? roomSubscription; // Declaração da assinatura do stream
+
+  @override
+  void dispose() {
+    roomSubscription?.cancel(); // Cancela qualquer assinatura existente
+    super.dispose();
+  }
 
   void _joinRoom(BuildContext context, String roomId) async {
     final playerName = _playerNameController.text;
@@ -37,7 +45,13 @@ class _RoomSelectionScreenState extends State<RoomSelectionScreen> {
       });
       isServer = true;
     } else {
-      final data = roomSnapshot.data() as Map<String, dynamic>;
+      final data = roomSnapshot.data() as Map<String, dynamic>?;
+      if (data == null || data['players'] == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao carregar os dados da sala')),
+        );
+        return;
+      }
       final players = List<String>.from(data['players']);
       if (players.length < 2) {
         players.add(playerName);
@@ -84,7 +98,10 @@ class _RoomSelectionScreenState extends State<RoomSelectionScreen> {
   }
 
   void _waitForOpponent(DocumentReference roomRef, String playerName) {
-    roomRef.snapshots().listen((roomSnapshot) {
+    roomSubscription?.cancel(); // Cancel any existing subscription
+    roomSubscription = roomRef.snapshots().listen((roomSnapshot) {
+      if (!mounted) return;
+      
       if (roomSnapshot.exists) {
         final data = roomSnapshot.data() as Map<String, dynamic>;
         final players = List<String>.from(data['players']);

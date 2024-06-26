@@ -4,42 +4,32 @@ import '../models/jogador.dart';
 import '../widgets/esconder_button.dart';
 import '../widgets/truco_button.dart';
 import '../widgets/scoreboard.dart';
-import '../controls/pedir_truco.dart';
+import 'package:tuple/tuple.dart';
 import '../controls/truco_manager.dart';
 import '../controls/score_manager.dart';
 
-class JogoTrucoLayout extends StatefulWidget {
-  final Jogador jogadorAtual;  // Atualizamos para receber apenas o jogador atual
+class JogoTrucoLayout extends StatelessWidget {
+  final Jogador jogadorAtual;
   final String resultadoRodada;
-  final List<Carta> cartasJaJogadas;
+  final List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa; // Alteração aqui
   final Function(int) onCartaSelecionada;
   final Carta? manilha;
   final bool rodadacontinua;
   final Pontuacao pontuacao;
   final VoidCallback onEsconderPressed;
+  final TrucoManager trucoManager = TrucoManager();
 
-  const JogoTrucoLayout({
+  JogoTrucoLayout({
     Key? key,
     required this.jogadorAtual,
     required this.resultadoRodada,
-    required this.cartasJaJogadas,
+    required this.cartasJogadasNaMesa, // Alteração aqui
     required this.onCartaSelecionada,
     this.manilha,
     required this.rodadacontinua,
     required this.pontuacao,
     required this.onEsconderPressed,
-    
   }) : super(key: key);
-
-  @override
-  JogoTrucoLayoutState createState() => JogoTrucoLayoutState();
-}
-
-class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
-  Truco truco = Truco();
-  final TrucoManager trucoManager = TrucoManager();
-  List<int> roundResults = [];
-  bool escondendoCarta = false;
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +58,10 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
           const Text('TRUCO ROYALE', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 212, 177, 18))),
           const SizedBox(height: 10),
           PontuacaoWidget(
-            key: ValueKey(roundResults.toString()),
-            nos: widget.jogadorAtual.pontuacao.getPontuacaoTotal(),
-            eles: widget.jogadorAtual.pontuacao.getPontuacaoTotal(),  // Atualize conforme a lógica de pontuação do adversário
-            roundResults: widget.pontuacao.getResultadosRodadas(),
+            key: ValueKey(pontuacao.getResultadosRodadas().toString()),
+            nos: pontuacao.getPontuacaoTotal(),
+            eles: pontuacao.getPontuacaoTotal(),  // Atualize conforme a lógica de pontuação do adversário
+            roundResults: pontuacao.getResultadosRodadas(),
           ),
         ],
       ),
@@ -103,8 +93,8 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
           ),
           child: Stack(
             children: [
-              if (widget.manilha != null) _buildManilha(),
-              _buildPlayedCards(),
+              if (manilha != null) _buildManilha(),
+              _buildPlayedCards(), // Alteração aqui
             ],
           ),
         ),
@@ -126,7 +116,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(4.0),
-          child: Image.asset(widget.manilha!.img),
+          child: Image.asset(manilha!.img),
         ),
       ),
     );
@@ -140,47 +130,59 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
       child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: widget.cartasJaJogadas.map((carta) {
-            return Container(
-              margin: const EdgeInsets.all(4.0),
-              child: Image.asset(carta.img, width: 70, height: 100),
-            );
+          children: cartasJogadasNaMesa.where((tuple) => tuple != null).map((tuple) {
+            final carta = tuple?.item2['carta'] as Carta?;
+            if (carta != null) {
+              return Container(
+                margin: const EdgeInsets.all(4.0),
+                child: Image.asset(carta.img, width: 70, height: 100),
+              );
+            } else {
+              return Container(); // Retorna um container vazio se carta for nula
+            }
           }).toList(),
         ),
       ),
     );
   }
+
+
 
   Widget _buildPlayerHands() {
-    return Positioned(
-      bottom: 70,
-      left: 0,
-      right: 0,
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: widget.jogadorAtual.mao.asMap().entries.map((entry) {
-            int index = entry.key;
-            Carta carta = entry.value;
-            bool cartaJaJogada = widget.cartasJaJogadas.contains(carta);
+  return Positioned(
+    bottom: 70,
+    left: 0,
+    right: 0,
+    child: Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: jogadorAtual.mao.asMap().entries.map((entry) {
+          int index = entry.key;
+          Carta carta = entry.value;
+          bool cartaJaJogada = cartasJogadasNaMesa.any((tuple) {
+            final cartaJogada = tuple?.item2['carta'] as Carta?;
+            return cartaJogada == carta;
+          });
 
-            return GestureDetector(
-              onTap: widget.rodadacontinua && !cartaJaJogada ? () => widget.onCartaSelecionada(index) : null,
-              child: Container(
-                margin: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: cartaJaJogada ? Colors.grey : Colors.white,
-                  border: Border.all(color: Colors.black),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Image.asset(carta.img, width: 92, height: 135, fit: BoxFit.cover),
+          return GestureDetector(
+            onTap: rodadacontinua && !cartaJaJogada ? () => onCartaSelecionada(index) : null,
+            child: Container(
+              margin: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: cartaJaJogada ? Colors.grey : Colors.white,
+                border: Border.all(color: Colors.black),
+                borderRadius: BorderRadius.circular(8.0),
               ),
-            );
-          }).toList(),
-        ),
+              child: Image.asset(carta.img, width: 92, height: 135, fit: BoxFit.cover),
+            ),
+          );
+        }).toList(),
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 
   Widget _buildActionButtons(BuildContext context) {
     return Positioned(
@@ -191,10 +193,10 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TrucoButton(onPressed: () => trucoManager.onTrucoButtonPressed(context, widget.jogadorAtual, [widget.jogadorAtual], 0)),  // Ajuste conforme a lógica de truco
+            TrucoButton(onPressed: () => trucoManager.onTrucoButtonPressed(context, jogadorAtual, [jogadorAtual], 0)),  // Ajuste conforme a lógica de truco
             const SizedBox(width: 50),
             CorrerButton(
-              onEsconderPressed: widget.onEsconderPressed,
+              onEsconderPressed: onEsconderPressed,
             ),
           ],
         ),
@@ -216,7 +218,7 @@ class JogoTrucoLayoutState extends State<JogoTrucoLayout> {
         child: Column(
           children: [
             Text(
-              'Jogador Atual: ${widget.jogadorAtual.nome}',
+              'Jogador Atual: ${jogadorAtual.nome}',
               style: const TextStyle(fontSize: 15, color: Colors.white),
             ),
             const SizedBox(height: 2),

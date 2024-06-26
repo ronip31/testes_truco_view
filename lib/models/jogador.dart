@@ -14,8 +14,9 @@ class Jogador {
   List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa = [];
   Set<Carta> cartasJaJogadas = {};
   Pontuacao pontuacao = Pontuacao();
+  int playerId; // Adiciona a propriedade playerId
 
-  Jogador(this.nome, this.grupo): mao = [];
+  Jogador(this.nome, this.grupo, this.playerId): mao = [];
 
   // Método de fábrica para criar jogadores a partir de uma lista de nomes
   static List<Jogador> criarJogadores(List<String> nomes, int numeroGrupos) {
@@ -23,13 +24,14 @@ class Jogador {
     int grupoAtual = 1;
 
     for (int i = 0; i < nomes.length; i++) {
-      jogadores.add(Jogador(nomes[i], grupoAtual));
+      jogadores.add(Jogador(nomes[i], grupoAtual, i + 1)); // Define o playerId
       grupoAtual = (grupoAtual % numeroGrupos) + 1;  // Alterna entre 1 e 2
-
-      for (Jogador jogador in jogadores) {
-        print('Jogador: ${jogador.nome} do Grupo: ${jogador.grupo}');
-      }
     }
+
+    for (Jogador jogador in jogadores) {
+      print('Jogador: ${jogador.nome} do Grupo: ${jogador.grupo} com playerId: ${jogador.playerId}');
+    }
+
     return jogadores;
   }
 

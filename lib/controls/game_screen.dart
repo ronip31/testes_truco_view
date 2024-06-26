@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'game_state.dart';  // Certifique-se de importar corretamente
+import 'jogotrucoplayer1screen.dart';  // Certifique-se de importar corretamente
+import 'jogotrucoplayer2screen.dart';  // Certifique-se de importar corretamente
 
 class GameScreen extends StatefulWidget {
   final String roomId;
@@ -15,6 +16,7 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> {
   String? opponentName;
   bool bothPlayersReady = false;
+  int? playerId;
 
   @override
   void initState() {
@@ -25,12 +27,13 @@ class _GameScreenState extends State<GameScreen> {
   void _checkOpponent() async {
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
     roomRef.snapshots().listen((snapshot) {
-      if (snapshot.exists) {
+      if (snapshot.exists && mounted) {
         final data = snapshot.data()!;
         final List<dynamic> players = data['players'];
         if (players.length == 2) {
           setState(() {
             opponentName = players.firstWhere((name) => name != widget.playerName);
+            playerId = players.indexOf(widget.playerName) + 1;
             bothPlayersReady = true;
           });
         }
@@ -39,12 +42,21 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _startGame() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => JogoTrucoScreen(roomId: widget.roomId, playerName: widget.playerName),
-      ),
-    );
+    if (playerId == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => JogoTrucoPlayer1Screen(roomId: widget.roomId, playerName: widget.playerName),
+        ),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => JogoTrucoPlayer2Screen(roomId: widget.roomId, playerName: widget.playerName),
+        ),
+      );
+    }
   }
 
   @override
