@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
-
 class PopupManager {
   static void showPopup(BuildContext context, String message) {
     final overlay = Overlay.of(context);
     final overlayEntry = _createOverlayEntry(context, message);
     overlay.insert(overlayEntry);
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(seconds: 2), () {
       overlayEntry.remove();
     });
   }
@@ -54,7 +53,6 @@ class PopupManager {
     );
   }
 
-  
   void mostrarPopup(BuildContext context, String message) {
     final overlay = Overlay.of(context);
     final overlayEntry = OverlayEntry(
@@ -92,4 +90,3 @@ class PopupManager {
     });
   }
 }
-

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/carta.dart';
@@ -7,6 +6,7 @@ import '../controls/game_logic.dart';
 import 'firebase_service.dart';
 import 'package:tuple/tuple.dart';
 import '../models/baralho.dart';
+import 'dart:async';
 
 abstract class JogoTrucoPlayerScreen extends StatefulWidget {
   final String roomId;
@@ -27,6 +27,8 @@ abstract class JogoTrucoPlayerScreenState<T extends JogoTrucoPlayerScreen> exten
   bool gameStateLoaded = false;
   StreamSubscription<DocumentSnapshot>? roomSubscription;
   Carta? manilha;
+  int jogadorAtualIndex = 1;
+
 
   @override
   void initState() {
@@ -58,10 +60,17 @@ abstract class JogoTrucoPlayerScreenState<T extends JogoTrucoPlayerScreen> exten
             _loadGameState(data['gameState']);
           }
           if (mounted) {
-            setState(() {});
+            setState(() {
+              gameReady = true;
+            });
           }
         } else if (data['gameState'] != null && !gameStateLoaded) {
           _loadGameState(data['gameState']);
+          if (mounted) {
+            setState(() {
+              gameReady = true;
+            });
+          }
         }
         if (data['mesaState'] != null) {
           _updateMesaState(data['mesaState']);
@@ -121,12 +130,9 @@ abstract class JogoTrucoPlayerScreenState<T extends JogoTrucoPlayerScreen> exten
     });
   }
 
-
   void jogarCarta(Carta carta) {
-  print('jogarCarta do JogoTrucoPlayerScreen');
-  gameLogic.jogarCarta(carta, context);
-}
-
+    gameLogic.jogarCarta(carta, context);
+  }
 
   @override
   Widget build(BuildContext context);

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'jogotrucoplayer1screen.dart';  // Certifique-se de importar corretamente
-import 'jogotrucoplayer2screen.dart';  // Certifique-se de importar corretamente
+import 'player_screen.dart';
 
 class GameScreen extends StatefulWidget {
   final String roomId;
@@ -42,21 +41,12 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _startGame() {
-    if (playerId == 1) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => JogoTrucoPlayer1Screen(roomId: widget.roomId, playerName: widget.playerName),
-        ),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => JogoTrucoPlayer2Screen(roomId: widget.roomId, playerName: widget.playerName),
-        ),
-      );
-    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PlayerScreen(roomId: widget.roomId, playerName: widget.playerName),
+      ),
+    );
   }
 
   @override

@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'jogo_truco_player_screen.dart';
 import '../interface_user/user_interface.dart';
 import '../controls/score_manager.dart';
+import 'resultado_rodada.dart';
 
-
-class JogoTrucoPlayer2Screen extends JogoTrucoPlayerScreen {
-  const JogoTrucoPlayer2Screen({Key? key, required String roomId, required String playerName})
+class PlayerScreen extends JogoTrucoPlayerScreen {
+  const PlayerScreen({Key? key, required String roomId, required String playerName})
       : super(key: key, roomId: roomId, playerName: playerName);
 
   @override
-  JogoTrucoPlayerScreenState createState() => _JogoTrucoPlayer2ScreenState();
+  JogoTrucoPlayerScreenState createState() => _PlayerScreenState();
 }
 
-class _JogoTrucoPlayer2ScreenState extends JogoTrucoPlayerScreenState<JogoTrucoPlayer2Screen> {
+class _PlayerScreenState extends JogoTrucoPlayerScreenState<PlayerScreen> {
   Pontuacao pontuacao = Pontuacao();
+  List<ResultadoRodada> resultadosRodadas = [];
+  String resultadoRodada = '';
 
   @override
   Widget build(BuildContext context) {
@@ -30,14 +32,17 @@ class _JogoTrucoPlayer2ScreenState extends JogoTrucoPlayerScreenState<JogoTrucoP
 
     return JogoTrucoLayout(
       jogadorAtual: jogadorAtual,
-      resultadoRodada: '',
+      jogadores: jogadores,
+      jogadorAtualIndex: jogadorAtualIndex,
+      resultadoRodada: resultadoRodada,
       cartasJogadasNaMesa: gameLogic.cartasJogadasNaMesa,
       manilha: manilha,
-      pontuacao: Pontuacao(),
+      pontuacao: pontuacao,
+      
       onCartaSelecionada: (index) {
         if (index >= 0 && index < jogadorAtual.mao.length) {
           var cartaSelecionada = jogadorAtual.mao[index];
-          jogarCarta(cartaSelecionada);
+          gameLogic.jogarCarta(cartaSelecionada, context);
         }
       },
       rodadacontinua: true,
@@ -45,4 +50,3 @@ class _JogoTrucoPlayer2ScreenState extends JogoTrucoPlayerScreenState<JogoTrucoP
     );
   }
 }
-

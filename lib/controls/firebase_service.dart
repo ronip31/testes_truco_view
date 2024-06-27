@@ -26,17 +26,17 @@ class FirebaseService {
   }
 
   Future<void> syncMesaState(int jogadorAtualIndex, List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa) async {
-  final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
-  print('Função syncMesaState chamada');
-  print('Jogador Atual Index: $jogadorAtualIndex');
-  print('Cartas Jogadas na Mesa: ${cartasJogadasNaMesa.map((e) => {
-    'jogador': e.item1.nome,
-    'playerId': e.item1.playerId,
-    'carta': e.item2['carta'].toString(),
-    'valor': e.item2['valor']
-  }).toList()}');
-  
-  await roomRef.update({
+    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
+    print('Função syncMesaState chamada');
+    print('Jogador Atual Index: $jogadorAtualIndex');
+    print('Cartas Jogadas na Mesa: ${cartasJogadasNaMesa.map((e) => {
+      'jogador': e.item1.nome,
+      'playerId': e.item1.playerId,
+      'carta': e.item2['carta'].toString(),
+      'valor': e.item2['valor']
+    }).toList()}');
+    
+    await roomRef.update({
       'mesaState': {
         'jogadorAtualIndex': jogadorAtualIndex,
         'cartasJogadasNaMesa': cartasJogadasNaMesa.map((tuple) => {
@@ -46,8 +46,8 @@ class FirebaseService {
           'valor': tuple.item2['valor'],
         }).toList(),
       }
-  });
-}
+    });
+  }
 
   Future<void> syncGameState(int jogadorAtualIndex, List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa, List<Carta> cartasJaJogadas, List<ResultadoRodada> resultadosRodadas, bool rodadacontinua, String resultadoRodada, List<int> roundResults) async {
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
@@ -65,7 +65,7 @@ class FirebaseService {
           'jogadorVencedor': resultado.jogadorVencedor?.nome
         }).toList()}');
     print('Rodada Continua: $rodadacontinua');
-    print('Resultado Rodada: $resultadoRodada');
+    print('Resultado Rodada: $resultadosRodadas');
     print('Round Results: $roundResults');
 
     await roomRef.update({
@@ -96,9 +96,29 @@ class FirebaseService {
     return snapshot.data();
   }
 
+  Future<void> updateRoundResult(String resultadoRodada) async {
+    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
+    await roomRef.update({
+      'gameState': {
+        'resultadoRodada': resultadoRodada,
+        'rodadacontinua': false,
+      }
+    });
+  }
+
   Stream<DocumentSnapshot> getGameStateStream() {
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
-    print('getGameStateStream() called. Room Ref: $roomRef');
     return roomRef.snapshots();
+  }
+
+  Future<void> limparEstadoParaProximaRodada() async {
+    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
+    await roomRef.update({
+      'gameState': {
+        'rodadacontinua': true,
+        'cartasJogadasNaMesa': [],
+        'resultadoRodada': '',
+      }
+    });
   }
 }
