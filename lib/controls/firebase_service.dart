@@ -21,24 +21,25 @@ class FirebaseService {
         'manilha': manilhaGlobal,
         'cartasJogador1': cartasJogador1,
         'cartasJogador2': cartasJogador2,
+        'currentPlayerId': 1, // Define o primeiro jogador
       }
     });
   }
 
-  Future<void> syncMesaState(int jogadorAtualIndex, List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa) async {
+  Future<void> syncMesaState(int currentPlayerId, List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa) async {
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
     print('Função syncMesaState chamada');
-    print('Jogador Atual Index: $jogadorAtualIndex');
+    print('Jogador Atual Id: $currentPlayerId');
     print('Cartas Jogadas na Mesa: ${cartasJogadasNaMesa.map((e) => {
       'jogador': e.item1.nome,
       'playerId': e.item1.playerId,
       'carta': e.item2['carta'].toString(),
       'valor': e.item2['valor']
     }).toList()}');
-    
+  
     await roomRef.update({
       'mesaState': {
-        'jogadorAtualIndex': jogadorAtualIndex,
+        'currentPlayerId': currentPlayerId,
         'cartasJogadasNaMesa': cartasJogadasNaMesa.map((tuple) => {
           'jogador': tuple.item1.nome,
           'playerId': tuple.item1.playerId,
@@ -49,10 +50,10 @@ class FirebaseService {
     });
   }
 
-  Future<void> syncGameState(int jogadorAtualIndex, List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa, List<Carta> cartasJaJogadas, List<ResultadoRodada> resultadosRodadas, bool rodadacontinua, String resultadoRodada, List<int> roundResults) async {
+  Future<void> syncGameState(int currentPlayerId, List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa, List<Carta> cartasJaJogadas, List<ResultadoRodada> resultadosRodadas, bool rodadacontinua, String resultadoRodada, List<int> roundResults) async {
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
     print('syncGameState() called');
-    print('Jogador Atual Index: $jogadorAtualIndex');
+    print('Jogador Atual Id: $currentPlayerId');
     print('Cartas Jogadas na Mesa: ${cartasJogadasNaMesa.map((e) => {
           'jogador': e.item1.nome,
           'playerId': e.item1.playerId,
@@ -70,7 +71,7 @@ class FirebaseService {
 
     await roomRef.update({
       'gameState': {
-        'jogadorAtualIndex': jogadorAtualIndex,
+        'currentPlayerId': currentPlayerId,
         'cartasJogadasNaMesa': cartasJogadasNaMesa.map((e) => {
           'jogador': e.item1.nome,
           'playerId': e.item1.playerId,
@@ -111,13 +112,20 @@ class FirebaseService {
     return roomRef.snapshots();
   }
 
+  Future<int> getCurrentPlayerId() async {
+    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
+    final snapshot = await roomRef.get();
+    final data = snapshot.data();
+    return data?['gameState']['currentPlayerId'] ?? 1;
+  }
+
   Future<void> limparEstadoParaProximaRodada() async {
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
     await roomRef.update({
       'gameState': {
         'rodadacontinua': true,
         'cartasJogadasNaMesa': [],
-        'resultadoRodada': '',
+        'currentPlayerId': 1, // Reinicia a rodada com o primeiro jogador
       }
     });
   }

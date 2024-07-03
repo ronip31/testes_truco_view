@@ -7,33 +7,39 @@ import '../widgets/scoreboard.dart';
 import 'package:tuple/tuple.dart';
 import '../controls/truco_manager.dart';
 import '../controls/score_manager.dart';
+import '../controls/game_logic.dart';
+import '../controls/firebase_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class JogoTrucoLayout extends StatelessWidget {
   final Jogador jogadorAtual;
+  final GameLogic gameLogic;
   final String resultadoRodada;
-  final List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa; // Alteração aqui
+  final List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa;
   final Function(int) onCartaSelecionada;
   final Carta? manilha;
   final bool rodadacontinua;
   final Pontuacao pontuacao;
   final VoidCallback onEsconderPressed;
   final TrucoManager trucoManager = TrucoManager();
-  final List<Jogador> jogadores; // Adicionado
-  final int jogadorAtualIndex; // Adicionado
+  final FirebaseService firebaseService;
+  final List<Jogador> jogadores;
 
   JogoTrucoLayout({
-    Key? key,
-    required this.jogadorAtual,
+    super.key,
+     required this.jogadorAtual,
+    required this.gameLogic,
     required this.resultadoRodada,
-    required this.cartasJogadasNaMesa, // Alteração aqui
+    required this.cartasJogadasNaMesa,
     required this.onCartaSelecionada,
     this.manilha,
     required this.rodadacontinua,
     required this.pontuacao,
     required this.onEsconderPressed,
-    required this.jogadores, // Adicionado
-    required this.jogadorAtualIndex, // Adicionado
-  }) : super(key: key);
+    required this.firebaseService,
+    required this.jogadores,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +141,7 @@ class JogoTrucoLayout extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: cartasJogadasNaMesa.where((tuple) => tuple != null).map((tuple) {
-            final carta = tuple?.item2['carta'] as Carta?;
+            final carta = tuple.item2['carta'] as Carta?;
             if (carta != null) {
               return Container(
                 margin: const EdgeInsets.all(4.0),
@@ -162,7 +168,7 @@ class JogoTrucoLayout extends StatelessWidget {
             int index = entry.key;
             Carta carta = entry.value;
             bool cartaJaJogada = cartasJogadasNaMesa.any((tuple) {
-              final cartaJogada = tuple?.item2['carta'] as Carta?;
+              final cartaJogada = tuple.item2['carta'] as Carta?;
               return cartaJogada == carta;
             });
 
@@ -205,26 +211,43 @@ class JogoTrucoLayout extends StatelessWidget {
   }
 
   Widget _buildTopInfo() {
-    return Positioned(
-      top: 10,
-      left: 40,
-      right: 40,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
-        decoration: BoxDecoration(
-          color: Colors.black87.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          children: [
-            Text(
-              'Jogador Atual: ${jogadores[jogadorAtualIndex].nome}',
-              style: const TextStyle(fontSize: 15, color: Colors.white),
-            ),
-            const SizedBox(height: 2),
-          ],
-        ),
+  return Positioned(
+    top: 10,
+    left: 40,
+    right: 40,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+      decoration: BoxDecoration(
+        color: Colors.black87.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(10),
       ),
-    );
-  }
+      child: Column(
+        children: [
+          StreamBuilder<DocumentSnapshot>(
+            stream: firebaseService.getGameStateStream(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data != null) {
+                var data = snapshot.data!.data() as Map<String, dynamic>?;
+                if (data != null && data['gameState'] != null) {
+                  var currentPlayerId = data['gameState']['currentPlayerId'];
+                  var currentPlayer = jogadores.firstWhere((jogador) => jogador.playerId == currentPlayerId, orElse: () => jogadores[0]);
+                  return Text(
+                    'Jogador Atual: ${currentPlayer.nome}',
+                    style: const TextStyle(fontSize: 15, color: Colors.white),
+                  );
+                }
+              }
+              return const Text(
+                'Carregando...',
+                style: TextStyle(fontSize: 15, color: Colors.white),
+              );
+            },
+          ),
+          const SizedBox(height: 2),
+        ],
+      ),
+    ),
+  );
+}
+
 }

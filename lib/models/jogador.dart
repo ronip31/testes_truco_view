@@ -5,7 +5,6 @@ import '../controls/score_manager.dart';
 
 class Jogador {
   Truco truco = Truco();
-  
   late String nome;
   List<Carta> mao = [];
   List<int> indicesSelecionados = [];
@@ -14,9 +13,9 @@ class Jogador {
   List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa = [];
   Set<Carta> cartasJaJogadas = {};
   Pontuacao pontuacao = Pontuacao();
-  int playerId; // Adiciona a propriedade playerId
+  int playerId;
 
-  Jogador(this.nome, this.grupo, this.playerId): mao = [];
+  Jogador(this.nome, this.grupo, this.playerId);
 
   // Método de fábrica para criar jogadores a partir de uma lista de nomes
   static List<Jogador> criarJogadores(List<String> nomes, int numeroGrupos) {

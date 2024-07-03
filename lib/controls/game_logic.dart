@@ -1,6 +1,6 @@
+import 'package:tuple/tuple.dart';
 import '../models/carta.dart';
 import '../models/jogador.dart';
-import 'package:tuple/tuple.dart';
 import 'firebase_service.dart';
 import 'resultado_rodada.dart';
 import 'game.dart';
@@ -10,10 +10,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../interface_user/popup_manager.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'turn_manager.dart';
 
 class GameLogic {
   final FirebaseService firebaseService;
   final List<Jogador> jogadores;
+  final TurnManager turnManager;
   List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa = [];
   List<Carta> cartasJaJogadas = [];
   List<ResultadoRodada> resultadosRodadas = [];
@@ -27,35 +29,42 @@ class GameLogic {
   List<int> roundResults = [];
   Pontuacao pontuacao = Pontuacao();
   PopupManager popupManager = PopupManager();
-  int jogadorAtualIndex = 0; // Controlar o índice do jogador atual
 
-  GameLogic(this.firebaseService, this.jogadores);
+  GameLogic(this.firebaseService, this.jogadores)
+      : turnManager = TurnManager();
 
-  Jogador get jogadorAtual => jogadores[jogadorAtualIndex];
+  Jogador get jogadorAtual => jogadores.firstWhere((jogador) => jogador.playerId == turnManager.currentPlayerId);
 
-  void jogarCarta(Carta carta, BuildContext context) {
+  Future<void> jogarCarta(Carta carta, BuildContext context) async {
+    final currentPlayerIdFromFirebase = await firebaseService.getCurrentPlayerId();
+    turnManager.setCurrentPlayerId(currentPlayerIdFromFirebase);
+
     final jogadorAtual = this.jogadorAtual;
-    print('void jogarCarta ${jogadorAtual.nome}');
+    print('void jogarCarta jogadorAtual ${jogadorAtual.nome}');
+    print('void jogarCarta playerId ${jogadorAtual.playerId}');
+    print('void jogarCarta turnManager.currentPlayerId ${turnManager.currentPlayerId}');
 
     // Verifica se o jogador atual tem a carta na mão e se é a vez dele
-    if (jogadorAtual.mao.contains(carta)) {
+    if (jogadorAtual.mao.contains(carta) && jogadorAtual.playerId == turnManager.currentPlayerId) {
       adicionarCartaNaMesa(jogadorAtual, carta);
       removerCartaDaMao(jogadorAtual, carta);
 
       // Passa a vez para o próximo jogador
-      jogadorAtualIndex = (jogadorAtualIndex + 1) % jogadores.length;
-      _syncMesaState(jogadorAtualIndex);
-      print('jogadorAtualIndex $jogadorAtualIndex');
+      turnManager.nextTurn(jogadores.length);
+      await _syncMesaState(turnManager.currentPlayerId);
+      print('jogadorAtualId ${turnManager.currentPlayerId}');
+      print('void jogadorAtualId jogadorAtual ${jogadorAtual.nome}');
 
       if (todosJogadoresJogaramUmaCarta()) {
         processarFimDaRodada(context);
       } else {
-        _syncGameState(); // Sincroniza o estado do jogo após a mudança de turno
+        await _syncGameState(); // Sincroniza o estado do jogo após a mudança de turno
       }
     } else {
       print('Não é a vez do jogador ou a carta não está na mão dele.');
     }
   }
+
   void adicionarCartaNaMesa(Jogador jogador, Carta carta) {
     print('adicionarCartaNaMesa do game logic');
     cartasJaJogadas.add(carta);
@@ -72,9 +81,9 @@ class GameLogic {
     jogador.mao.remove(carta);
   }
 
-  Future<void> _syncMesaState(int jogadorAtualIndex) async {
+  Future<void> _syncMesaState(int currentPlayerId) async {
     print("_syncMesaState game logic");
-    await firebaseService.syncMesaState(jogadorAtualIndex, cartasJogadasNaMesa);
+    await firebaseService.syncMesaState(currentPlayerId, cartasJogadasNaMesa);
   }
 
   bool todosJogadoresJogaramUmaCarta() {
@@ -93,7 +102,7 @@ class GameLogic {
     // Mostrar popup para ambos os jogadores e limpar a mesa
     Future.delayed(const Duration(seconds: 2), () {
       limparMesa();
-      jogadorAtualIndex = 0; // Reinicia o índice do jogador para a próxima rodada
+      turnManager.resetTurn(); // Reinicia o índice do jogador para a próxima rodada
       _syncGameState(); // Sincroniza o estado do jogo após limpar a mesa
     });
   }
@@ -139,7 +148,7 @@ class GameLogic {
 
   Future<void> _syncGameState() async {
     await firebaseService.syncGameState(
-      jogadorAtualIndex, // Atualiza o estado com o índice do jogador atual
+      turnManager.currentPlayerId, // Atualiza o estado com o índice do jogador atual
       cartasJogadasNaMesa,
       cartasJaJogadas,
       resultadosRodadas,

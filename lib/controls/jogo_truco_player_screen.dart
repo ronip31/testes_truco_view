@@ -7,12 +7,13 @@ import 'firebase_service.dart';
 import 'package:tuple/tuple.dart';
 import '../models/baralho.dart';
 import 'dart:async';
+import 'turn_manager.dart';
 
 abstract class JogoTrucoPlayerScreen extends StatefulWidget {
   final String roomId;
   final String playerName;
 
-  const JogoTrucoPlayerScreen({Key? key, required this.roomId, required this.playerName}) : super(key: key);
+  const JogoTrucoPlayerScreen({super.key, required this.roomId, required this.playerName});
 
   @override
   JogoTrucoPlayerScreenState createState();
@@ -24,10 +25,11 @@ abstract class JogoTrucoPlayerScreenState<T extends JogoTrucoPlayerScreen> exten
   late Jogador jogadorAtual;
   late FirebaseService firebaseService;
   late GameLogic gameLogic;
+  late TurnManager turnManager;
   bool gameStateLoaded = false;
   StreamSubscription<DocumentSnapshot>? roomSubscription;
   Carta? manilha;
-  int jogadorAtualIndex = 1;
+  int jogadorAtualIndex = 0;
 
 
   @override

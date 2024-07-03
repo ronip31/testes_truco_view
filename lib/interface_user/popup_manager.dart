@@ -84,7 +84,7 @@ class PopupManager {
       ),
     );
 
-    overlay?.insert(overlayEntry);
+    overlay.insert(overlayEntry);
     Future.delayed(const Duration(seconds: 2), () {
       overlayEntry.remove();
     });

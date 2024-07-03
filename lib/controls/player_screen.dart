@@ -4,6 +4,7 @@ import '../interface_user/user_interface.dart';
 import '../controls/score_manager.dart';
 import 'resultado_rodada.dart';
 
+
 class PlayerScreen extends JogoTrucoPlayerScreen {
   const PlayerScreen({Key? key, required String roomId, required String playerName})
       : super(key: key, roomId: roomId, playerName: playerName);
@@ -32,13 +33,13 @@ class _PlayerScreenState extends JogoTrucoPlayerScreenState<PlayerScreen> {
 
     return JogoTrucoLayout(
       jogadorAtual: jogadorAtual,
+      gameLogic: gameLogic,
+      firebaseService: firebaseService,
       jogadores: jogadores,
-      jogadorAtualIndex: jogadorAtualIndex,
       resultadoRodada: resultadoRodada,
       cartasJogadasNaMesa: gameLogic.cartasJogadasNaMesa,
       manilha: manilha,
       pontuacao: pontuacao,
-      
       onCartaSelecionada: (index) {
         if (index >= 0 && index < jogadorAtual.mao.length) {
           var cartaSelecionada = jogadorAtual.mao[index];

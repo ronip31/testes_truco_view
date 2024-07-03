@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/playernameform.dart'; 
 import '../controls/game_screen.dart';
-import '../models/carta.dart';
 import '../models/baralho.dart';
-import '../models/jogador.dart';
+
 
 class RoomSelectionScreen extends StatefulWidget {
-  const RoomSelectionScreen({Key? key}) : super(key: key);
+  const RoomSelectionScreen({super.key});
 
   @override
   _RoomSelectionScreenState createState() => _RoomSelectionScreenState();
