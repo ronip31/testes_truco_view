@@ -1,10 +1,9 @@
 import 'dart:async'; // Importação necessária para StreamSubscription
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../widgets/playernameform.dart'; 
+import '../widgets/playernameform.dart';
 import '../controls/game_screen.dart';
 import '../models/baralho.dart';
-
 
 class RoomSelectionScreen extends StatefulWidget {
   const RoomSelectionScreen({super.key});
@@ -41,6 +40,9 @@ class _RoomSelectionScreenState extends State<RoomSelectionScreen> {
     if (!roomSnapshot.exists) {
       await roomRef.set({
         'players': [playerName],
+        'gameState': {
+          'currentPlayerId': 1, // Inicialize com o primeiro jogador
+        },
       });
       isServer = true;
     } else {
@@ -97,10 +99,10 @@ class _RoomSelectionScreenState extends State<RoomSelectionScreen> {
   }
 
   void _waitForOpponent(DocumentReference roomRef, String playerName) {
-    roomSubscription?.cancel(); // Cancel any existing subscription
+    roomSubscription?.cancel(); // Cancela qualquer assinatura existente
     roomSubscription = roomRef.snapshots().listen((roomSnapshot) {
       if (!mounted) return;
-      
+
       if (roomSnapshot.exists) {
         final data = roomSnapshot.data() as Map<String, dynamic>;
         final players = List<String>.from(data['players']);
@@ -120,33 +122,71 @@ class _RoomSelectionScreenState extends State<RoomSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Seleção de Sala'),
+        title: const Text('Seleção de Sala') ,
       ),
-      body: Column(
-        children: [
-          PlayerNameForm(controller: _playerNameController),
-          Expanded(
-            child: ListView(
-              children: List.generate(4, (index) {
-                final roomId = 'room${index + 1}';
-                return ListTile(
-                  title: Text('Sala ${index + 1}'),
-                  onTap: () => _joinRoom(context, roomId),
-                );
-              }),
-            ),
+      body: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.green[800]!, Colors.green[200]!],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          if (_waitingForOpponent)
-            const Center(
-              child: Column(
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 10),
-                  Text('Aguardando oponente...'),
-                ],
+        ),
+        child: Column(
+          children: [
+            const Text(
+              'Bem-vindo ao Truco Royale!',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
-        ],
+            const SizedBox(height: 20),
+            PlayerNameForm(controller: _playerNameController),
+            const SizedBox(height: 20),
+            Expanded(
+              child: ListView.builder(
+                itemCount: 4,
+                itemBuilder: (context, index) {
+                  final roomId = 'room${index + 1}';
+                  return Card(
+                    color: Colors.green[100],
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ListTile(
+                      title: Text(
+                        'Sala ${index + 1}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios),
+                      onTap: () => _joinRoom(context, roomId),
+                    ),
+                  );
+                },
+              ),
+            ),
+            if (_waitingForOpponent)
+              const Center(
+                child: Column(
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 10),
+                    Text(
+                      'Aguardando oponente...',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

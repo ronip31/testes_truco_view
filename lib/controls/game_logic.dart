@@ -108,10 +108,21 @@ class GameLogic {
   }
 
   void mostrarResultadoRodada(Jogador? jogadorVencedor, BuildContext context) {
+
+    int result = jogadorVencedor == null ? 0 : (jogadorVencedor == jogadores[0] ? 1 : 2);
+    print('result $result');
+
+    roundResults.add(result);
+    
+    pontuacao.adicionarResultadoRodada(result);
+
+    print('Results updated: $roundResults');
+
     resultadoRodada = jogadorVencedor != null
         ? 'O ${jogadorVencedor.nome} ganhou a rodada!'
         : 'Empate!';
-
+    rodadacontinua = false;
+  
     firebaseService.updateRoundResult(resultadoRodada);
     
     StreamBuilder<DocumentSnapshot>(
