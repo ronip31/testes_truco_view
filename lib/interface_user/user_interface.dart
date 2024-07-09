@@ -78,26 +78,47 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
   }
 
   AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.green[800],
-      elevation: 5,
-      toolbarHeight: 120,
-      title: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('TRUCO ROYALE', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 212, 177, 18))),
-          const SizedBox(height: 10),
-          PontuacaoWidget(
-            key: ValueKey(widget.pontuacao.getResultadosRodadas().toString()),
-            nos: widget.pontuacao.getPontuacaoTotal(),
-            eles: widget.pontuacao.getPontuacaoTotal(),  // Atualize conforme a lógica de pontuação do adversário
-            roundResults: widget.pontuacao.getResultadosRodadas(),
-          ),
-        ],
-      ),
-      centerTitle: true,
-    );
-  }
+  return AppBar(
+    backgroundColor: Colors.green[800],
+    elevation: 5,
+    toolbarHeight: 120,
+    title: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('TRUCO ROYALE', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 212, 177, 18))),
+        const SizedBox(height: 10),
+        StreamBuilder<DocumentSnapshot>(
+          stream: widget.firebaseService.getGameStateStream(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data != null) {
+              var data = snapshot.data!.data() as Map<String, dynamic>?;
+              if (data != null && data['gameState'] != null) {
+                var roundResults = data['gameState']['roundResults'] as List<dynamic>? ?? [];
+                var nos = data['gameState']['nos'] ?? 0;
+                var eles = data['gameState']['eles'] ?? 0;
+
+                return PontuacaoWidget(
+                  key: ValueKey(roundResults.toString()),
+                  nos: nos,
+                  eles: eles,
+                  roundResults: roundResults.cast<int>(),
+                );
+              }
+            }
+            return const PontuacaoWidget(
+              key: ValueKey('loading'),
+              nos: 0,
+              eles: 0,
+              roundResults: [],
+            );
+          },
+        ),
+      ],
+    ),
+    centerTitle: true,
+  );
+}
+
 
   Widget _buildBackground() {
     return Positioned.fill(

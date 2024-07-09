@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 import '../models/carta.dart';
 import '../models/jogador.dart';
@@ -5,9 +6,8 @@ import 'firebase_service.dart';
 import 'resultado_rodada.dart';
 import 'game.dart';
 import 'truco_manager.dart';
-import '../controls/score_manager.dart';
+import 'score_manager.dart';
 import 'dart:async';
-import 'package:flutter/material.dart';
 import '../interface_user/popup_manager.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'turn_manager.dart';
@@ -29,6 +29,7 @@ class GameLogic extends ChangeNotifier {
   List<int> roundResults = [];
   Pontuacao pontuacao = Pontuacao();
   PopupManager popupManager = PopupManager();
+  VoidCallback? onReiniciarRodada;
 
   GameLogic(this.firebaseService, this.jogadores)
       : turnManager = TurnManager();
@@ -51,7 +52,7 @@ class GameLogic extends ChangeNotifier {
 
       // Passa a vez para o próximo jogador
       turnManager.nextTurn(jogadores.length);
-      await _syncGameState();
+      await _syncMesaState(turnManager.currentPlayerId);
       print('jogadorAtualId ${turnManager.currentPlayerId}');
       print('void jogadorAtualId jogadorAtual ${jogadorAtual.nome}');
 
@@ -79,6 +80,11 @@ class GameLogic extends ChangeNotifier {
 
   void removerCartaDaMao(Jogador jogador, Carta carta) {
     jogador.mao.remove(carta);
+  }
+
+  Future<void> _syncMesaState(int currentPlayerId) async {
+    print("_syncMesaState game logic");
+    await firebaseService.syncMesaState(currentPlayerId, cartasJogadasNaMesa);
   }
 
   bool todosJogadoresJogaramUmaCarta() {
@@ -158,6 +164,7 @@ class GameLogic extends ChangeNotifier {
   }
 
   Future<void> _syncGameState() async {
+    print('_syncGameState: $cartasJogadasNaMesa $cartasJaJogadas');
     await firebaseService.syncGameState(
       currentPlayerId: turnManager.currentPlayerId,
       cartasJogadasNaMesa: cartasJogadasNaMesa,
@@ -165,34 +172,38 @@ class GameLogic extends ChangeNotifier {
       resultadosRodadas: resultadosRodadas,
       rodadacontinua: true,
       roundResults: roundResults,
+      resultadoRodada: resultadoRodada,
     );
   }
-
+  
   void verificarVencedorDoJogo(List<ResultadoRodada> resultadosRodadas) {
-    print('verificarVencedorDoJogo');
-    Jogador? vencedorJogo = determinarVencedor(resultadosRodadas);
-    if (vencedorJogo != null) {
-      rodadacontinua = false;
+  print('verificarVencedorDoJogo');
+  Jogador? vencedorJogo = determinarVencedor(resultadosRodadas);
+  if (vencedorJogo != null) {
+    rodadacontinua = false;
 
-      trucoManager.adicionarPontuacaoAoVencedor(vencedorJogo);
+    trucoManager.adicionarPontuacaoAoVencedor(vencedorJogo);
 
-      for (var jogador in jogadores) {
-        int pontuacaoTotal = vencedorJogo.pontuacao.getPontuacaoTotal();
+    for (var jogador in jogadores) {
+      int pontuacaoTotal = vencedorJogo.pontuacao.getPontuacaoTotal();
 
-        if (pontuacaoTotal >= 12) {
-          resultadoRodada = '\nO Grupo ${jogador.nome} GANHOU o jogo!';
-          // Adicionar lógica para mostrar a mensagem para todos os jogadores
-          break;
-        }
-      }
-
-      if (jogoContinua) {
-        Future.delayed(const Duration(seconds: 5), () {
-          reiniciarRodada();
-        });
+      if (pontuacaoTotal >= 12) {
+        resultadoRodada = '\nO Grupo ${jogador.nome} GANHOU o jogo!';
+        // Adicionar lógica para mostrar a mensagem para todos os jogadores
+        jogoContinua = false;
+        break;
       }
     }
+
+    if (jogoContinua) {
+      Future.delayed(const Duration(seconds: 5), () {
+        if (onReiniciarRodada != null) {
+          onReiniciarRodada!();
+        }
+      });
+    }
   }
+}
 
   void reiniciarRodada() {
     print('reiniciarRodada() called');
@@ -202,5 +213,9 @@ class GameLogic extends ChangeNotifier {
     resultadoRodada = '';
     jogoContinua = true;
     rodadacontinua = true;
+    notifyListeners(); // Notifica os ouvintes (incluindo o widget) sobre a mudança de estado
+    if (onReiniciarRodada != null) {
+      onReiniciarRodada!();
+    }
   }
 }

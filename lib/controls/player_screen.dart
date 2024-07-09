@@ -25,7 +25,7 @@ class _PlayerScreenState extends JogoTrucoPlayerScreenState<PlayerScreen> {
         appBar: AppBar(
           title: Text('Aguardando o início do jogo...'),
         ),
-        body: Center(
+        body: const Center(
           child: CircularProgressIndicator(),
         ),
       );

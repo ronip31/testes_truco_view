@@ -38,6 +38,7 @@ Jogador? compararCartas(List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogada
 
 
   Carta? manilhaGlobal;
+  
   void finalizarRodada(List<Jogador> jogadores, Baralho baralho, int numeroJogadores, resultadosRodadas) {
 
   for (var jogador in jogadores) {

@@ -26,64 +26,76 @@ class FirebaseService {
     });
   }
 
+  Future<void> syncMesaState(int currentPlayerId, List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa) async {
+    final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
+    print('Função syncMesaState chamada');
+    print('Jogador Atual Id: $currentPlayerId');
+    print('Cartas Jogadas na Mesa: ${cartasJogadasNaMesa.map((e) => {
+      'jogador': e.item1.nome,
+      'playerId': e.item1.playerId,
+      'carta': e.item2['carta'].toString(),
+      'valor': e.item2['valor']
+    }).toList()}');
+  
+    await roomRef.update({
+      'gameState': {
+        'currentPlayerId': currentPlayerId,
+        'cartasJogadasNaMesa': FieldValue.arrayUnion(cartasJogadasNaMesa.map((tuple) => {
+          'jogador': tuple.item1.nome,
+          'playerId': tuple.item1.playerId,
+          'carta': tuple.item2['carta'].toString(),
+          'valor': tuple.item2['valor'],
+        }).toList())
+      }
+    });
+  }
+
   Future<void> syncGameState({
-    int? currentPlayerId,
-    List<Tuple2<Jogador, Map<String, dynamic>>>? cartasJogadasNaMesa,
-    List<Carta>? cartasJaJogadas,
-    List<ResultadoRodada>? resultadosRodadas,
-    bool? rodadacontinua,
-    String? resultadoRodada,
-    List<int>? roundResults,
+    required int currentPlayerId,
+    required List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa,
+    required List<Carta> cartasJaJogadas,
+    required List<ResultadoRodada> resultadosRodadas,
+    required bool rodadacontinua,
+    required String resultadoRodada,
+    required List<int> roundResults,
   }) async {
     final roomRef = FirebaseFirestore.instance.collection('rooms').doc(roomId);
     print('syncGameState() called');
+    print('Jogador Atual Id: $currentPlayerId');
+    print('Cartas Jogadas na Mesa: ${cartasJogadasNaMesa.map((e) => {
+          'jogador': e.item1.nome,
+          'playerId': e.item1.playerId,
+          'carta': e.item2['carta'].toString(),
+          'valor': e.item2['valor']
+        }).toList()}');
+    print('Cartas Já Jogadas: ${cartasJaJogadas.map((carta) => carta.toString()).toList()}');
+    print('Resultados Rodadas: ${resultadosRodadas.map((resultado) => {
+          'numeroRodada': resultado.numeroRodada,
+          'jogadorVencedor': resultado.jogadorVencedor?.nome
+        }).toList()}');
+    print('Rodada Continua: $rodadacontinua');
+    print('Resultado Rodada: $resultadosRodadas');
+    print('Round Results: $roundResults');
 
-    final Map<String, dynamic> gameStateUpdate = {};
-
-    if (currentPlayerId != null) {
-      gameStateUpdate['currentPlayerId'] = currentPlayerId;
-      print('Jogador Atual Id: $currentPlayerId');
-    }
-
-    if (cartasJogadasNaMesa != null) {
-      gameStateUpdate['cartasJogadasNaMesa'] = cartasJogadasNaMesa.map((e) => {
-        'jogador': e.item1.nome,
-        'playerId': e.item1.playerId,
-        'carta': e.item2['carta'].toString(),
-        'valor': e.item2['valor']
-      }).toList();
-      print('Cartas Jogadas na Mesa: ${gameStateUpdate['cartasJogadasNaMesa']}');
-    }
-
-    if (cartasJaJogadas != null) {
-      gameStateUpdate['cartasJaJogadas'] = cartasJaJogadas.map((carta) => carta.toString()).toList();
-      print('Cartas Já Jogadas: ${gameStateUpdate['cartasJaJogadas']}');
-    }
-
-    if (resultadosRodadas != null) {
-      gameStateUpdate['resultadosRodadas'] = resultadosRodadas.map((resultado) => {
-        'numeroRodada': resultado.numeroRodada,
-        'jogadorVencedor': resultado.jogadorVencedor?.nome
-      }).toList();
-      print('Resultados Rodadas: ${gameStateUpdate['resultadosRodadas']}');
-    }
-
-    if (rodadacontinua != null) {
-      gameStateUpdate['rodadacontinua'] = rodadacontinua;
-      print('Rodada Continua: $rodadacontinua');
-    }
-
-    if (resultadoRodada != null) {
-      gameStateUpdate['resultadoRodada'] = resultadoRodada;
-      print('Resultado Rodada: $resultadoRodada');
-    }
-
-    if (roundResults != null) {
-      gameStateUpdate['roundResults'] = roundResults;
-      print('Round Results: $roundResults');
-    }
-
-    await roomRef.update({'gameState': gameStateUpdate});
+    await roomRef.update({
+      'gameState': {
+        'currentPlayerId': currentPlayerId,
+        'cartasJogadasNaMesa': cartasJogadasNaMesa.map((e) => {
+          'jogador': e.item1.nome,
+          'playerId': e.item1.playerId,
+          'carta': e.item2['carta'].toString(),
+          'valor': e.item2['valor']
+        }).toList(),
+        'cartasJaJogadas': cartasJaJogadas.map((carta) => carta.toString()).toList(),
+        'resultadosRodadas': resultadosRodadas.map((resultado) => {
+          'numeroRodada': resultado.numeroRodada,
+          'jogadorVencedor': resultado.jogadorVencedor?.nome
+        }).toList(),
+        'rodadacontinua': rodadacontinua,
+        'resultadoRodada': resultadoRodada,
+        'roundResults': roundResults
+      }
+    });
   }
 
   Future<Map<String, dynamic>?> loadGameState() async {

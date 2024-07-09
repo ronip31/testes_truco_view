@@ -55,6 +55,7 @@ abstract class JogoTrucoPlayerScreenState<T extends JogoTrucoPlayerScreen> exten
           jogadores = Jogador.criarJogadores(players.cast<String>(), 2);
           jogadorAtual = jogadores.firstWhere((jogador) => jogador.nome == widget.playerName);
           gameLogic = GameLogic(firebaseService, jogadores);
+          gameLogic.onReiniciarRodada = _reiniciarRodada;
           if (players[0] == widget.playerName && data['gameState'] == null) {
             _distributeCards();
           } else if (!gameStateLoaded) {
@@ -93,46 +94,66 @@ abstract class JogoTrucoPlayerScreenState<T extends JogoTrucoPlayerScreen> exten
 
     await firebaseService.distributeCards(cartasJogador1, cartasJogador2, manilhaGlobal).then((_) {
       if (mounted) {
-        setState(() {
-          gameReady = true;
-        });
+        _reloadGameState();
       }
     });
   }
 
   void _loadGameState(Map<String, dynamic>? gameState) {
-    if (gameState != null && mounted) {
+  if (gameState != null && mounted) {
+    setState(() {
+      manilha = gameState['manilha'] != null ? Carta.fromString(gameState['manilha']) : null;
+      
+      if (jogadorAtual.playerId == 1) {
+        jogadorAtual.mao = (gameState['cartasJogador1'] as List<dynamic>?)
+            ?.map((cartaMap) => Carta.fromString(cartaMap as String))
+            .toList() ?? [];
+      } else if (jogadorAtual.playerId == 2) {
+        jogadorAtual.mao = (gameState['cartasJogador2'] as List<dynamic>?)
+            ?.map((cartaMap) => Carta.fromString(cartaMap as String))
+            .toList() ?? [];
+      }
+
+      gameReady = true;
+      gameStateLoaded = true;
+    });
+  }
+}
+
+void _reloadGameState() async {
+  final gameState = await firebaseService.loadGameState();
+  if (gameState != null) {
+    _loadGameState(gameState);
+  }
+}
+
+  void _updateMesaState(Map<String, dynamic> gameState) {
+    if (!mounted) return;
+    
+    final List<dynamic>? cartasJogadasNaMesaList = gameState['cartasJogadasNaMesa'] as List<dynamic>?;
+
+    if (cartasJogadasNaMesaList != null) {
       setState(() {
-        manilha = Carta.fromString(gameState['manilha']);
-        if (jogadorAtual.playerId == 1) {
-          jogadorAtual.mao = (gameState['cartasJogador1'] as List).map((cartaMap) => Carta.fromString(cartaMap)).toList();
-        } else if (jogadorAtual.playerId == 2) {
-          jogadorAtual.mao = (gameState['cartasJogador2'] as List).map((cartaMap) => Carta.fromString(cartaMap)).toList();
-        }
-        gameReady = true;
-        gameStateLoaded = true;
+        gameLogic.cartasJogadasNaMesa = cartasJogadasNaMesaList.map((cartaMap) {
+          final jogador = jogadores.firstWhere((jogador) => jogador.nome == cartaMap['jogador']);
+          return Tuple2(
+            jogador,
+            {
+              'carta': Carta.fromString(cartaMap['carta']),
+              'valor': cartaMap['valor']
+            }
+          );
+        }).toList();
       });
     }
   }
 
-  void _updateMesaState(Map<String, dynamic> gameState) {
-    if (!mounted) return;
-    setState(() {
-      gameLogic.cartasJogadasNaMesa = (gameState['cartasJogadasNaMesa'] as List).map((cartaMap) {
-        final jogador = jogadores.firstWhere((jogador) => jogador.nome == cartaMap['jogador']);
-        return Tuple2(
-          jogador,
-          {
-            'carta': Carta.fromString(cartaMap['carta']),
-            'valor': cartaMap['valor']
-          }
-        );
-      }).toList();
-    });
-  }
-
   void jogarCarta(Carta carta) {
     gameLogic.jogarCarta(carta, context);
+  }
+
+  void _reiniciarRodada() {
+    _distributeCards();
   }
 
   @override
