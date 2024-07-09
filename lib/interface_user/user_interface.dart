@@ -11,8 +11,7 @@ import '../controls/game_logic.dart';
 import '../controls/firebase_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-class JogoTrucoLayout extends StatelessWidget {
+class JogoTrucoLayout extends StatefulWidget {
   final Jogador jogadorAtual;
   final GameLogic gameLogic;
   final String resultadoRodada;
@@ -28,7 +27,7 @@ class JogoTrucoLayout extends StatelessWidget {
 
   JogoTrucoLayout({
     super.key,
-     required this.jogadorAtual,
+    required this.jogadorAtual,
     required this.gameLogic,
     required this.resultadoRodada,
     required this.cartasJogadasNaMesa,
@@ -40,6 +39,27 @@ class JogoTrucoLayout extends StatelessWidget {
     required this.firebaseService,
     required this.jogadores,
   });
+
+  @override
+  _JogoTrucoLayoutState createState() => _JogoTrucoLayoutState();
+}
+
+class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
+  @override
+  void initState() {
+    super.initState();
+    widget.gameLogic.addListener(_updateState);
+  }
+
+  @override
+  void dispose() {
+    widget.gameLogic.removeListener(_updateState);
+    super.dispose();
+  }
+
+  void _updateState() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +88,10 @@ class JogoTrucoLayout extends StatelessWidget {
           const Text('TRUCO ROYALE', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 212, 177, 18))),
           const SizedBox(height: 10),
           PontuacaoWidget(
-            key: ValueKey(pontuacao.getResultadosRodadas().toString()),
-            nos: pontuacao.getPontuacaoTotal(),
-            eles: pontuacao.getPontuacaoTotal(),  // Atualize conforme a lógica de pontuação do adversário
-            roundResults: pontuacao.getResultadosRodadas(),
+            key: ValueKey(widget.pontuacao.getResultadosRodadas().toString()),
+            nos: widget.pontuacao.getPontuacaoTotal(),
+            eles: widget.pontuacao.getPontuacaoTotal(),  // Atualize conforme a lógica de pontuação do adversário
+            roundResults: widget.pontuacao.getResultadosRodadas(),
           ),
         ],
       ),
@@ -103,8 +123,8 @@ class JogoTrucoLayout extends StatelessWidget {
           ),
           child: Stack(
             children: [
-              if (manilha != null) _buildManilha(),
-              _buildPlayedCards(), // Alteração aqui
+              if (widget.manilha != null) _buildManilha(),
+              _buildPlayedCards(),
             ],
           ),
         ),
@@ -126,7 +146,7 @@ class JogoTrucoLayout extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.all(4.0),
-          child: Image.asset(manilha!.img),
+          child: Image.asset(widget.manilha!.img),
         ),
       ),
     );
@@ -138,19 +158,27 @@ class JogoTrucoLayout extends StatelessWidget {
       left: 0,
       right: 0,
       child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: cartasJogadasNaMesa.where((tuple) => tuple != null).map((tuple) {
-            final carta = tuple.item2['carta'] as Carta?;
-            if (carta != null) {
-              return Container(
-                margin: const EdgeInsets.all(4.0),
-                child: Image.asset(carta.img, width: 70, height: 100),
-              );
-            } else {
-              return Container(); // Retorna um container vazio se carta for nula
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: widget.firebaseService.getGameStateStream(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data != null) {
+              var data = snapshot.data!.data() as Map<String, dynamic>?;
+              if (data != null && data['gameState'] != null) {
+                var cartasNaMesa = data['gameState']['cartasJogadasNaMesa'] as List<dynamic>? ?? [];
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: cartasNaMesa.map((cartaData) {
+                    var carta = Carta.fromString(cartaData['carta']);
+                    return Container(
+                      margin: const EdgeInsets.all(4.0),
+                      child: Image.asset(carta.img, width: 70, height: 100),
+                    );
+                  }).toList(),
+                );
+              }
             }
-          }).toList(),
+            return Container(); // Retorna um container vazio se os dados não estiverem prontos
+          },
         ),
       ),
     );
@@ -164,16 +192,16 @@ class JogoTrucoLayout extends StatelessWidget {
       child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: jogadorAtual.mao.asMap().entries.map((entry) {
+          children: widget.jogadorAtual.mao.asMap().entries.map((entry) {
             int index = entry.key;
             Carta carta = entry.value;
-            bool cartaJaJogada = cartasJogadasNaMesa.any((tuple) {
+            bool cartaJaJogada = widget.cartasJogadasNaMesa.any((tuple) {
               final cartaJogada = tuple.item2['carta'] as Carta?;
               return cartaJogada == carta;
             });
 
             return GestureDetector(
-              onTap: rodadacontinua && !cartaJaJogada ? () => onCartaSelecionada(index) : null,
+              onTap: widget.rodadacontinua && !cartaJaJogada ? () => widget.onCartaSelecionada(index) : null,
               child: Container(
                 margin: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
@@ -199,10 +227,10 @@ class JogoTrucoLayout extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TrucoButton(onPressed: () => trucoManager.onTrucoButtonPressed(context, jogadorAtual, [jogadorAtual], 0)),  // Ajuste conforme a lógica de truco
+            TrucoButton(onPressed: () => widget.trucoManager.onTrucoButtonPressed(context, widget.jogadorAtual, [widget.jogadorAtual], 0)),  // Ajuste conforme a lógica de truco
             const SizedBox(width: 50),
             CorrerButton(
-              onEsconderPressed: onEsconderPressed,
+              onEsconderPressed: widget.onEsconderPressed,
             ),
           ],
         ),
@@ -224,13 +252,13 @@ class JogoTrucoLayout extends StatelessWidget {
       child: Column(
         children: [
           StreamBuilder<DocumentSnapshot>(
-            stream: firebaseService.getGameStateStream(),
+            stream: widget.firebaseService.getGameStateStream(),
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data != null) {
                 var data = snapshot.data!.data() as Map<String, dynamic>?;
                 if (data != null && data['gameState'] != null) {
                   var currentPlayerId = data['gameState']['currentPlayerId'];
-                  var currentPlayer = jogadores.firstWhere((jogador) => jogador.playerId == currentPlayerId, orElse: () => jogadores[0]);
+                  var currentPlayer = widget.jogadores.firstWhere((jogador) => jogador.playerId == currentPlayerId, orElse: () => widget.jogadores[0]);
                   return Text(
                     'Jogador Atual: ${currentPlayer.nome}',
                     style: const TextStyle(fontSize: 15, color: Colors.white),
@@ -249,5 +277,4 @@ class JogoTrucoLayout extends StatelessWidget {
     ),
   );
 }
-
 }

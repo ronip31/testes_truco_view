@@ -12,7 +12,7 @@ import '../interface_user/popup_manager.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'turn_manager.dart';
 
-class GameLogic {
+class GameLogic extends ChangeNotifier {
   final FirebaseService firebaseService;
   final List<Jogador> jogadores;
   final TurnManager turnManager;
@@ -51,7 +51,7 @@ class GameLogic {
 
       // Passa a vez para o próximo jogador
       turnManager.nextTurn(jogadores.length);
-      await _syncMesaState(turnManager.currentPlayerId);
+      await _syncGameState();
       print('jogadorAtualId ${turnManager.currentPlayerId}');
       print('void jogadorAtualId jogadorAtual ${jogadorAtual.nome}');
 
@@ -81,11 +81,6 @@ class GameLogic {
     jogador.mao.remove(carta);
   }
 
-  Future<void> _syncMesaState(int currentPlayerId) async {
-    print("_syncMesaState game logic");
-    await firebaseService.syncMesaState(currentPlayerId, cartasJogadasNaMesa);
-  }
-
   bool todosJogadoresJogaramUmaCarta() {
     print("todosJogadoresJogaramUmaCarta");
     return cartasJogadasNaMesa.length == jogadores.length;
@@ -104,11 +99,11 @@ class GameLogic {
       limparMesa();
       turnManager.resetTurn(); // Reinicia o índice do jogador para a próxima rodada
       _syncGameState(); // Sincroniza o estado do jogo após limpar a mesa
+      notifyListeners(); // Notifica os ouvintes (incluindo o widget) sobre a mudança de estado
     });
   }
 
   void mostrarResultadoRodada(Jogador? jogadorVencedor, BuildContext context) {
-
     int result = jogadorVencedor == null ? 0 : (jogadorVencedor == jogadores[0] ? 1 : 2);
     print('result $result');
 
@@ -141,6 +136,9 @@ class GameLogic {
                 // Chame o método para limpar o estado e iniciar a próxima rodada após 2 segundos
                 Future.delayed(Duration(seconds: 2), () {
                   firebaseService.limparEstadoParaProximaRodada();
+                  limparMesa();
+                  _syncGameState(); // Sincroniza o estado do jogo após limpar a mesa
+                  notifyListeners(); // Notifica os ouvintes (incluindo o widget) sobre a mudança de estado
                 });
               });
             }
@@ -155,17 +153,18 @@ class GameLogic {
     print('limparMesa');
     cartasJogadasNaMesa.clear();
     cartasJaJogadas.clear();
+    print('limparMesa as cartasJogadasNaMesa: $cartasJogadasNaMesa');
+    print('limparMesa as cartasJaJogadas: $cartasJaJogadas');
   }
 
   Future<void> _syncGameState() async {
     await firebaseService.syncGameState(
-      turnManager.currentPlayerId, // Atualiza o estado com o índice do jogador atual
-      cartasJogadasNaMesa,
-      cartasJaJogadas,
-      resultadosRodadas,
-      true,
-      '',
-      roundResults,
+      currentPlayerId: turnManager.currentPlayerId,
+      cartasJogadasNaMesa: cartasJogadasNaMesa,
+      cartasJaJogadas: cartasJaJogadas,
+      resultadosRodadas: resultadosRodadas,
+      rodadacontinua: true,
+      roundResults: roundResults,
     );
   }
 

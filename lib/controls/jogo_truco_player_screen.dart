@@ -31,7 +31,6 @@ abstract class JogoTrucoPlayerScreenState<T extends JogoTrucoPlayerScreen> exten
   Carta? manilha;
   int jogadorAtualIndex = 0;
 
-
   @override
   void initState() {
     super.initState();
@@ -74,8 +73,8 @@ abstract class JogoTrucoPlayerScreenState<T extends JogoTrucoPlayerScreen> exten
             });
           }
         }
-        if (data['mesaState'] != null) {
-          _updateMesaState(data['mesaState']);
+        if (data['gameState'] != null) {
+          _updateMesaState(data['gameState']);
         }
       }
     });
@@ -116,10 +115,10 @@ abstract class JogoTrucoPlayerScreenState<T extends JogoTrucoPlayerScreen> exten
     }
   }
 
-  void _updateMesaState(Map<String, dynamic> mesaState) {
+  void _updateMesaState(Map<String, dynamic> gameState) {
     if (!mounted) return;
     setState(() {
-      gameLogic.cartasJogadasNaMesa = (mesaState['cartasJogadasNaMesa'] as List).map((cartaMap) {
+      gameLogic.cartasJogadasNaMesa = (gameState['cartasJogadasNaMesa'] as List).map((cartaMap) {
         final jogador = jogadores.firstWhere((jogador) => jogador.nome == cartaMap['jogador']);
         return Tuple2(
           jogador,
