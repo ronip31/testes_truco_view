@@ -34,17 +34,6 @@ class Jogador {
     return jogadores;
   }
 
-  void obterCartaDaMao() {
-    print('\nCartas na mão do $nome:');
-    for (var i = 0; i < mao.length; i++) {
-        if (!indicesSelecionados.contains(i)) {
-            var carta = mao[i];
-            var valor = carta.ehManilha ? carta.valorManilha : carta.valorToInt();
-            print('${i + 1} $carta - Valor: $valor${carta.ehManilha ? ' (M)' : ''}');
-        }
-    }
-  }
-
   // Método para limpar a lista de índices das cartas selecionadas
   void limparIndicesSelecionados() {
     indicesSelecionados.clear();

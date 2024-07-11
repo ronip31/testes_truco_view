@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import '../widgets/roundIndicator.dart';
+import '../controls/firebase_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PontuacaoWidget extends StatelessWidget {
+  final String roomId; // Adiciona roomId para buscar dados do Firebase
   final int nos;
   final int eles;
   final List<int> roundResults;
 
   const PontuacaoWidget({
     super.key,
+    required this.roomId, // Adiciona roomId no construtor
     required this.nos,
     required this.eles,
     required this.roundResults,
@@ -15,6 +19,26 @@ class PontuacaoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseService(roomId).getGameStateStream(), // Obtém o stream do estado do jogo do Firebase
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data != null) {
+          var data = snapshot.data!.data() as Map<String, dynamic>?;
+          if (data != null && data['gameState'] != null) {
+            var gameState = data['gameState'];
+            var roundResults = gameState['roundResults'] as List<dynamic>? ?? [];
+            var nos = gameState['nos'] ?? 0;
+            var eles = gameState['eles'] ?? 0;
+
+            return _buildScoreContainer(nos, eles, roundResults.cast<int>());
+          }
+        }
+        return _buildScoreContainer(nos, eles, roundResults);
+      },
+    );
+  }
+
+  Widget _buildScoreContainer(int nos, int eles, List<int> roundResults) {
     return Container(
       padding: const EdgeInsets.all(3.0),
       decoration: _buildBoxDecoration(),
@@ -23,8 +47,8 @@ class PontuacaoWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildScoreColumn('Nós', nos, 1),
-              _buildScoreColumn('Eles', eles, 2),
+              _buildScoreColumn('Nós', nos, 1, roundResults),
+              _buildScoreColumn('Eles', eles, 2, roundResults),
             ],
           ),
         ],
@@ -47,7 +71,7 @@ class PontuacaoWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildScoreColumn(String title, int score, int player) {
+  Widget _buildScoreColumn(String title, int score, int player, List<int> roundResults) {
     print("Results for $title: $roundResults"); // Debug para verificar os resultados recebidos
     List<int> playerResults = roundResults.take(3).toList();
     List<Color> playerColors = playerResults.asMap().entries.map((entry) {
@@ -65,7 +89,7 @@ class PontuacaoWidget extends StatelessWidget {
     return Column(
       children: [
         Text(title, style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
-        Text(score.toString(), style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold) ),
+        Text(score.toString(), style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
         const Text('Rodadas', style: TextStyle(fontSize: 15)),
         RoundIndicator(colors: playerColors),
       ],

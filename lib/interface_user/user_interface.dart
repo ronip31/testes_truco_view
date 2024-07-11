@@ -12,18 +12,18 @@ import '../controls/firebase_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class JogoTrucoLayout extends StatefulWidget {
-  final Jogador jogadorAtual;
-  final GameLogic gameLogic;
-  final String resultadoRodada;
-  final List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa;
-  final Function(int) onCartaSelecionada;
-  final Carta? manilha;
-  final bool rodadacontinua;
-  final Pontuacao pontuacao;
-  final VoidCallback onEsconderPressed;
-  final TrucoManager trucoManager = TrucoManager();
-  final FirebaseService firebaseService;
-  final List<Jogador> jogadores;
+  final Jogador jogadorAtual; // Jogador atual
+  final GameLogic gameLogic; // Lógica do jogo
+  final String resultadoRodada; // Resultado da rodada
+  final List<Tuple2<Jogador, Map<String, dynamic>>> cartasJogadasNaMesa; // Cartas jogadas na mesa
+  final Function(int) onCartaSelecionada; // Função chamada ao selecionar uma carta
+  final Carta? manilha; // Carta manilha
+  final bool rodadacontinua; // Indicador se a rodada continua
+  final Pontuacao pontuacao; // Pontuação do jogo
+  final VoidCallback onEsconderPressed; // Callback quando o botão de esconder é pressionado
+  final TrucoManager trucoManager = TrucoManager(); // Gerenciador de truco
+  final FirebaseService firebaseService; // Serviço Firebase
+  final List<Jogador> jogadores; // Lista de jogadores
 
   JogoTrucoLayout({
     super.key,
@@ -48,15 +48,16 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
   @override
   void initState() {
     super.initState();
-    widget.gameLogic.addListener(_updateState);
+    widget.gameLogic.addListener(_updateState); // Adiciona um listener para atualizações do estado do jogo
   }
 
   @override
   void dispose() {
-    widget.gameLogic.removeListener(_updateState);
+    widget.gameLogic.removeListener(_updateState); // Remove o listener ao descartar o widget
     super.dispose();
   }
 
+  // Função chamada para atualizar o estado do widget
   void _updateState() {
     setState(() {});
   }
@@ -64,19 +65,20 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(), // Constrói a barra de app
       body: Stack(
         children: [
-          _buildBackground(),
-          _buildTable(),
-          _buildPlayerHands(),
-          _buildActionButtons(context),
-          _buildTopInfo(),
+          _buildBackground(), // Constrói o fundo
+          _buildTable(), // Constrói a mesa de jogo
+          _buildPlayerHands(), // Constrói as mãos dos jogadores
+          _buildActionButtons(context), // Constrói os botões de ação
+          _buildTopInfo(), // Constrói a informação do topo
         ],
       ),
     );
   }
 
+  // Constrói a barra de app
   AppBar _buildAppBar() {
   return AppBar(
     backgroundColor: Colors.green[800],
@@ -85,7 +87,14 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
     title: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text('TRUCO ROYALE', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 212, 177, 18))),
+        const Text(
+          'TRUCO ROYALE',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 212, 177, 18),
+          ),
+        ),
         const SizedBox(height: 10),
         StreamBuilder<DocumentSnapshot>(
           stream: widget.firebaseService.getGameStateStream(),
@@ -99,6 +108,7 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
 
                 return PontuacaoWidget(
                   key: ValueKey(roundResults.toString()),
+                  roomId: widget.firebaseService.roomId, // Adiciona roomId para buscar dados do Firebase
                   nos: nos,
                   eles: eles,
                   roundResults: roundResults.cast<int>(),
@@ -107,6 +117,7 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
             }
             return const PontuacaoWidget(
               key: ValueKey('loading'),
+              roomId: '', // Define um valor padrão ou vazio para roomId
               nos: 0,
               eles: 0,
               roundResults: [],
@@ -120,6 +131,7 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
 }
 
 
+  // Constrói o fundo da tela
   Widget _buildBackground() {
     return Positioned.fill(
       child: Image.asset(
@@ -129,6 +141,7 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
     );
   }
 
+  // Constrói a mesa de jogo
   Widget _buildTable() {
     return Positioned(
       top: 100,
@@ -144,8 +157,8 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
           ),
           child: Stack(
             children: [
-              if (widget.manilha != null) _buildManilha(),
-              _buildPlayedCards(),
+              if (widget.manilha != null) _buildManilha(), // Constrói a carta manilha se existir
+              _buildPlayedCards(), // Constrói as cartas jogadas
             ],
           ),
         ),
@@ -153,6 +166,7 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
     );
   }
 
+  // Constrói a carta manilha
   Widget _buildManilha() {
     return Positioned(
       top: 10,
@@ -173,6 +187,7 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
     );
   }
 
+  // Constrói as cartas jogadas na mesa
   Widget _buildPlayedCards() {
     return Positioned(
       bottom: 50,
@@ -205,6 +220,7 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
     );
   }
 
+  // Constrói as mãos dos jogadores
   Widget _buildPlayerHands() {
     return Positioned(
       bottom: 70,
@@ -239,6 +255,7 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
     );
   }
 
+  // Constrói os botões de ação
   Widget _buildActionButtons(BuildContext context) {
     return Positioned(
       bottom: 25,
@@ -259,43 +276,44 @@ class _JogoTrucoLayoutState extends State<JogoTrucoLayout> {
     );
   }
 
+  // Constrói as informações do topo
   Widget _buildTopInfo() {
-  return Positioned(
-    top: 10,
-    left: 40,
-    right: 40,
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
-      decoration: BoxDecoration(
-        color: Colors.black87.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        children: [
-          StreamBuilder<DocumentSnapshot>(
-            stream: widget.firebaseService.getGameStateStream(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData && snapshot.data != null) {
-                var data = snapshot.data!.data() as Map<String, dynamic>?;
-                if (data != null && data['gameState'] != null) {
-                  var currentPlayerId = data['gameState']['currentPlayerId'];
-                  var currentPlayer = widget.jogadores.firstWhere((jogador) => jogador.playerId == currentPlayerId, orElse: () => widget.jogadores[0]);
-                  return Text(
-                    'Jogador Atual: ${currentPlayer.nome}',
-                    style: const TextStyle(fontSize: 15, color: Colors.white),
-                  );
+    return Positioned(
+      top: 10,
+      left: 40,
+      right: 40,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+        decoration: BoxDecoration(
+          color: Colors.black87.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            StreamBuilder<DocumentSnapshot>(
+              stream: widget.firebaseService.getGameStateStream(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  var data = snapshot.data!.data() as Map<String, dynamic>?;
+                  if (data != null && data['gameState'] != null) {
+                    var currentPlayerId = data['gameState']['currentPlayerId'];
+                    var currentPlayer = widget.jogadores.firstWhere((jogador) => jogador.playerId == currentPlayerId, orElse: () => widget.jogadores[0]);
+                    return Text(
+                      'Jogador Atual: ${currentPlayer.nome}',
+                      style: const TextStyle(fontSize: 15, color: Colors.white),
+                    );
+                  }
                 }
-              }
-              return const Text(
-                'Carregando...',
-                style: TextStyle(fontSize: 15, color: Colors.white),
-              );
-            },
-          ),
-          const SizedBox(height: 2),
-        ],
+                return const Text(
+                  'Carregando...',
+                  style: TextStyle(fontSize: 15, color: Colors.white),
+                );
+              },
+            ),
+            const SizedBox(height: 2),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

@@ -1,29 +1,34 @@
 class Carta {
-  String valor;
-  String naipe;
-  bool ehManilha;
-  int valorManilha;
-  bool escondida;
+  // Atributos da classe Carta
+  String valor; // Valor da carta (ex: "A", "2", "3", etc.)
+  String naipe; // Naipe da carta (ex: "Copas", "Espadas", etc.)
+  bool ehManilha; // Indica se a carta é uma manilha
+  int valorManilha; // Valor da manilha, se for o caso
+  bool escondida; // Indica se a carta está escondida
 
+  // Construtor da classe Carta
   Carta({
     required this.valor,
     required this.naipe,
     this.ehManilha = false,
     this.escondida = false,
-  }) : valorManilha = 0;
+  }) : valorManilha = 0; // Inicializa o valorManilha como 0
 
+  // Método getter para a imagem da carta
   String get img {
     if (escondida) {
-      return 'assets/imgs/fundocarta.jpg';
+      return 'assets/imgs/fundocarta.jpg'; // Retorna a imagem de fundo se a carta estiver escondida
     }
-    return 'assets/imgs/$valor.$naipe.png';
+    return 'assets/imgs/$valor.$naipe.png'; // Retorna a imagem correspondente ao valor e naipe da carta
   }
 
+  // Método para converter o objeto Carta para uma string
   @override
   String toString() {
     return '$valor,$naipe,$ehManilha,$valorManilha,$escondida';
   }
 
+  // Método estático para criar um objeto Carta a partir de uma string
   static Carta fromString(String cartaStr) {
     var parts = cartaStr.split(',');
     return Carta(
@@ -34,9 +39,10 @@ class Carta {
     );
   }
 
+  // Método para converter o valor da carta em um inteiro
   int valorToInt() {
     if (escondida) {
-      return -1;
+      return -1; // Retorna -1 se a carta estiver escondida
     }
     switch (valor) {
       case '3':
@@ -64,6 +70,7 @@ class Carta {
     }
   }
 
+  // Método para atribuir pontos de manilha às cartas
   void atribuirPontosManilha(List<Carta> manilhasReais) {
     for (var manilha in manilhasReais) {
       if (manilha.valor == valor && manilha.naipe == naipe) {
@@ -86,15 +93,17 @@ class Carta {
     }
   }
 
+  // Método para esconder a carta
   void esconder() {
     escondida = true;
     valor = 'ESCONDIDA'; // Define um valor especial para cartas escondidas
   }
 
+  // Getter para o valor de comparação da carta
   int get valorParaComparacao {
     if (escondida) {
-      return -1;
+      return -1; // Retorna -1 se a carta estiver escondida
     }
-    return ehManilha ? valorManilha : valorToInt();
+    return ehManilha ? valorManilha : valorToInt(); // Retorna o valor da manilha ou o valor da carta
   }
 }

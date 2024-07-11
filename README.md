@@ -1,16 +1,36 @@
 # truco_view20
 
-A new Flutter project.
+Truco Royale é um jogo de truco online desenvolvido com Flutter e Firebase. O objetivo deste projeto é permitir que os jogadores possam jogar truco remotamente, sincronizando o estado do jogo em tempo real entre os dispositivos.
 
-## Getting Started
+## Funcionalidades
 
-This project is a starting point for a Flutter application.
+- Jogo de Truco Online: Jogue truco com um amigo remotamente.
+- Sincronização em Tempo Real: Utilize o Firebase para sincronizar o estado do jogo entre os jogadores.
+- Interface Interativa: Interface de usuário amigável e intuitiva desenvolvida com Flutter.
+- Gerenciamento de Salas: Crie ou entre em uma sala de jogo e aguarde seu oponente.
+-Manilha Aleatória: As manilhas são embaralhadas e distribuídas automaticamente no início   de cada rodada.
+- Popup de Resultado: Notificação do resultado da rodada
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+##Estrutura do Projeto
+- main.dart: Ponto de entrada do aplicativo.
+- interface_user/: Contém as telas e widgets de interface do usuário.
+    - home_screen.dart: Tela inicial do jogo.
+    - room_selection_screen.dart: Tela para seleção de salas.
+- controls/: Contém a lógica do jogo e integração com Firebase.
+    - game_logic.dart: Contém a lógica principal do jogo de truco.
+    - firebase_service.dart: Integração com o Firebase para sincronização do estado do jogo.
+    - turn_manager.dart: Gerencia a vez dos jogadores.
+    - truco_manager.dart: Gerencia a lógica de truco.
+    - game_screen.dart: Tela principal do jogo.
+- models/: Contém as classes de modelo.
+    - baralho.dart: Representação do baralho de cartas.
+    - carta.dart: Representação de uma carta.
+    - jogador.dart: Representação de um jogador.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+## Observação
+Jogo não está 100% funcional, após a primera rodada as cartas não aparecem nas mãos dos jogadores.
+
+## Licença
+Este projeto está licenciado sob a MIT License. Veja o arquivo LICENSE para mais detalhes.

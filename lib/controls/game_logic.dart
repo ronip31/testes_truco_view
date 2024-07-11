@@ -31,11 +31,13 @@ class GameLogic extends ChangeNotifier {
   PopupManager popupManager = PopupManager();
   VoidCallback? onReiniciarRodada;
 
-  GameLogic(this.firebaseService, this.jogadores)
-      : turnManager = TurnManager();
+  // Construtor da classe
+  GameLogic(this.firebaseService, this.jogadores) : turnManager = TurnManager();
 
+  // Obtém o jogador atual
   Jogador get jogadorAtual => jogadores.firstWhere((jogador) => jogador.playerId == turnManager.currentPlayerId);
 
+  // Função para jogar uma carta
   Future<void> jogarCarta(Carta carta, BuildContext context) async {
     final currentPlayerIdFromFirebase = await firebaseService.getCurrentPlayerId();
     turnManager.setCurrentPlayerId(currentPlayerIdFromFirebase);
@@ -66,6 +68,7 @@ class GameLogic extends ChangeNotifier {
     }
   }
 
+  // Adiciona uma carta na mesa
   void adicionarCartaNaMesa(Jogador jogador, Carta carta) {
     print('adicionarCartaNaMesa do game logic');
     cartasJaJogadas.add(carta);
@@ -78,20 +81,24 @@ class GameLogic extends ChangeNotifier {
     ));
   }
 
+  // Remove uma carta da mão do jogador
   void removerCartaDaMao(Jogador jogador, Carta carta) {
     jogador.mao.remove(carta);
   }
 
+  // Sincroniza o estado da mesa com o Firebase
   Future<void> _syncMesaState(int currentPlayerId) async {
     print("_syncMesaState game logic");
     await firebaseService.syncMesaState(currentPlayerId, cartasJogadasNaMesa);
   }
 
+  // Verifica se todos os jogadores jogaram uma carta
   bool todosJogadoresJogaramUmaCarta() {
     print("todosJogadoresJogaramUmaCarta");
     return cartasJogadasNaMesa.length == jogadores.length;
   }
 
+  // Processa o fim da rodada
   void processarFimDaRodada(BuildContext context) {
     print('processarFimDaRodada');
     jogadorVencedor = compararCartas(cartasJogadasNaMesa);
@@ -109,23 +116,22 @@ class GameLogic extends ChangeNotifier {
     });
   }
 
+  // Mostra o resultado da rodada
   void mostrarResultadoRodada(Jogador? jogadorVencedor, BuildContext context) {
     int result = jogadorVencedor == null ? 0 : (jogadorVencedor == jogadores[0] ? 1 : 2);
     print('result $result');
 
     roundResults.add(result);
-    
     pontuacao.adicionarResultadoRodada(result);
-
     print('Results updated: $roundResults');
 
     resultadoRodada = jogadorVencedor != null
         ? 'O ${jogadorVencedor.nome} ganhou a rodada!'
         : 'Empate!';
     rodadacontinua = false;
-  
+
     firebaseService.updateRoundResult(resultadoRodada);
-    
+
     StreamBuilder<DocumentSnapshot>(
       stream: firebaseService.getGameStateStream(),
       builder: (context, snapshot) {
@@ -155,6 +161,7 @@ class GameLogic extends ChangeNotifier {
     );
   }
 
+  // Limpa as cartas da mesa
   void limparMesa() {
     print('limparMesa');
     cartasJogadasNaMesa.clear();
@@ -163,6 +170,7 @@ class GameLogic extends ChangeNotifier {
     print('limparMesa as cartasJaJogadas: $cartasJaJogadas');
   }
 
+  // Sincroniza o estado do jogo com o Firebase
   Future<void> _syncGameState() async {
     print('_syncGameState: $cartasJogadasNaMesa $cartasJaJogadas');
     await firebaseService.syncGameState(
@@ -175,8 +183,9 @@ class GameLogic extends ChangeNotifier {
       resultadoRodada: resultadoRodada,
     );
   }
-  
-  void verificarVencedorDoJogo(List<ResultadoRodada> resultadosRodadas) {
+
+  // Verifica o vencedor do jogo
+void verificarVencedorDoJogo(List<ResultadoRodada> resultadosRodadas) {
   print('verificarVencedorDoJogo');
   Jogador? vencedorJogo = determinarVencedor(resultadosRodadas);
   if (vencedorJogo != null) {
@@ -185,6 +194,7 @@ class GameLogic extends ChangeNotifier {
     trucoManager.adicionarPontuacaoAoVencedor(vencedorJogo);
 
     for (var jogador in jogadores) {
+      
       int pontuacaoTotal = vencedorJogo.pontuacao.getPontuacaoTotal();
 
       if (pontuacaoTotal >= 12) {
@@ -195,16 +205,18 @@ class GameLogic extends ChangeNotifier {
       }
     }
 
+    // Atualiza a pontuação no Firebase
+    firebaseService.updateScore(jogadores[0].pontuacao.getPontuacaoTotal(), jogadores[1].pontuacao.getPontuacaoTotal());
+
     if (jogoContinua) {
       Future.delayed(const Duration(seconds: 5), () {
-        if (onReiniciarRodada != null) {
-          onReiniciarRodada!();
-        }
+        reiniciarRodada();
       });
     }
   }
 }
 
+  // Reinicia a rodada
   void reiniciarRodada() {
     print('reiniciarRodada() called');
     resultadosRodadas.clear();
