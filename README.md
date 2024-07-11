@@ -30,7 +30,7 @@ Truco Royale é um jogo de truco online desenvolvido com Flutter e Firebase. O o
 
 
 ## Observação
-Jogo não está 100% funcional, após a primera rodada as cartas não aparecem nas mãos dos jogadores.
+Jogo não está 100% funcional, após a primeira rodada as cartas não aparecem nas mãos dos jogadores.
 
 ## Licença
 Este projeto está licenciado sob a MIT License. Veja o arquivo LICENSE para mais detalhes.
