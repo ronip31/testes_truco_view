@@ -41,9 +41,9 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDqjxgsDYw-ORmgrkCu4ImW69iMKp2IJwA',
-    appId: '1:465802225394:web:df3c5e2c792c79bd1e926b',
-    messagingSenderId: '465802225394',
+    apiKey: '',
+    appId: '1:',
+    messagingSenderId: '',
     projectId: 'truco-royale',
     authDomain: 'truco-royale.firebaseapp.com',
     storageBucket: 'truco-royale.appspot.com',
@@ -51,35 +51,35 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDZNNMqatKZP-YhzJMRkAW2RMCmVpbWBvA',
-    appId: '1:465802225394:android:bdaf4ad349cad78d1e926b',
-    messagingSenderId: '465802225394',
+    apiKey: '',
+    appId: '1:',
+    messagingSenderId: '',
     projectId: 'truco-royale',
     storageBucket: 'truco-royale.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDIpiUn_docUYiRbz50kfTph2skUsc7C8M',
-    appId: '1:465802225394:ios:5187cd2709b81a601e926b',
-    messagingSenderId: '465802225394',
+    apiKey: '',
+    appId: '1:',
+    messagingSenderId: '',
     projectId: 'truco-royale',
     storageBucket: 'truco-royale.appspot.com',
     iosBundleId: 'com.example.trucoView20',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDIpiUn_docUYiRbz50kfTph2skUsc7C8M',
-    appId: '1:465802225394:ios:5187cd2709b81a601e926b',
-    messagingSenderId: '465802225394',
+    apiKey: '',
+    appId: '1:',
+    messagingSenderId: '',
     projectId: 'truco-royale',
     storageBucket: 'truco-royale.appspot.com',
     iosBundleId: 'com.example.trucoView20',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDqjxgsDYw-ORmgrkCu4ImW69iMKp2IJwA',
-    appId: '1:465802225394:web:a0f8b6bf01a928c41e926b',
-    messagingSenderId: '465802225394',
+    apiKey: '',
+    appId: '1:',
+    messagingSenderId: '',
     projectId: 'truco-royale',
     authDomain: 'truco-royale.firebaseapp.com',
     storageBucket: 'truco-royale.appspot.com',
